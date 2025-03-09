@@ -28,7 +28,7 @@ public class ServiceProviderService {
 
         newSp.setUsername(sp.getUsername());
         newSp.setPassword(passwordEncoder.encode(sp.getPassword()));
-        newSp.setRole(Role.ADMIN);
+        newSp.setRole(Role.SP);
         newSp.setAddress(sp.getAddress());
         newSp.setFirstname(sp.getFirstname());
         newSp.setLastname(sp.getLastname());

@@ -29,7 +29,7 @@ public class ProductProviderService {
 
         newPp.setUsername(pp.getUsername());
         newPp.setPassword(passwordEncoder.encode(pp.getPassword()));
-        newPp.setRole(Role.ADMIN);
+        newPp.setRole(Role.PP);
         newPp.setAddress(pp.getAddress());
         newPp.setFirstname(pp.getFirstname());
         newPp.setLastname(pp.getLastname());
