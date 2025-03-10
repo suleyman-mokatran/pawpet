@@ -75,4 +75,8 @@ public class ProductProviderService {
     public List<ProductProvider> getAllProductProviders(){
         return productProviderRepository.findByRole(Role.PP);
     }
+
+    public ProductProvider findByUsername(String username) {
+        return productProviderRepository.findByUsername(username);
+    }
 }

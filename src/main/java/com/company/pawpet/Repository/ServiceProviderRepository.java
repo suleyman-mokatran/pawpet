@@ -15,4 +15,6 @@ public interface ServiceProviderRepository extends JpaRepository<ServiceProvider
     List<ServiceProvider> findServiceProviderByCompany(@Param("companyId") int companyId);
 
     List<ServiceProvider> findByRole(Role role);
+
+    ServiceProvider findByUsername(String username);
 }

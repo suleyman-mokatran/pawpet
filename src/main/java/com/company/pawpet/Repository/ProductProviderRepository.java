@@ -15,4 +15,6 @@ public interface ProductProviderRepository extends JpaRepository<ProductProvider
     List<ProductProvider> findProductProviderByCompany(@Param("companyId") int companyId);
 
     List<ProductProvider> findByRole(Role role);
+
+    ProductProvider findByUsername(String username);
 }

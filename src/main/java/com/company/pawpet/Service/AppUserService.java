@@ -2,6 +2,7 @@ package com.company.pawpet.Service;
 
 import com.company.pawpet.Enum.Role;
 import com.company.pawpet.Model.AppUser;
+import com.company.pawpet.Model.ServiceProvider;
 import com.company.pawpet.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -73,5 +74,9 @@ public class AppUserService{
     }
     public Optional<AppUser> getUserById(int id) {
         return appUserRepository.findById(id);
+    }
+
+    public AppUser findByUsername(String username) {
+        return appUserRepository.findByUsername(username);
     }
 }

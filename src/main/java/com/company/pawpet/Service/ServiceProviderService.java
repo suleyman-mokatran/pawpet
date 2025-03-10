@@ -77,4 +77,8 @@ public class ServiceProviderService {
     public List<ServiceProvider> getAllServiceProviders(){
         return serviceProviderRepository.findByRole(Role.SP);
     }
+
+    public ServiceProvider findByUsername(String username) {
+        return serviceProviderRepository.findByUsername(username);
+    }
 }
