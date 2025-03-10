@@ -1,12 +1,9 @@
 package com.company.pawpet.Controller;
 
 import com.company.pawpet.Model.AppUser;
-import com.company.pawpet.Model.ServiceProvider;
 import com.company.pawpet.PasswordUpdateRequest;
-import com.company.pawpet.Repository.ServiceProviderRepository;
 import com.company.pawpet.Repository.UserRepository;
 import com.company.pawpet.Service.AppUserService;
-import com.company.pawpet.Service.ServiceProviderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

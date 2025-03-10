@@ -2,14 +2,11 @@ package com.company.pawpet.Service;
 
 import com.company.pawpet.Enum.Role;
 import com.company.pawpet.Model.AppUser;
-import com.company.pawpet.Model.ServiceProvider;
 import com.company.pawpet.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
