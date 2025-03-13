@@ -4,15 +4,15 @@ import jakarta.persistence.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 @Entity
 public class Doctor extends AppUser {
 
-    @Column(nullable = true)
     String specialization;
 
     @ElementCollection
-    private List<String> availableDays;
+    private Map<String, String> availableDays;
     int experienceYears;
 
 
@@ -27,11 +27,11 @@ public class Doctor extends AppUser {
         this.specialization = specialization;
     }
 
-    public List<String> getAvailableDays() {
+    public Map<String, String> getAvailableDays() {
         return availableDays;
     }
 
-    public void setAvailableDays(List<String> availableDays) {
+    public void setAvailableDays(Map<String, String> availableDays) {
         this.availableDays = availableDays;
     }
 

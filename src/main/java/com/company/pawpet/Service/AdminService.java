@@ -59,7 +59,6 @@ public class AdminService {
         adminToUpdate.setLastname(admin.getLastname());
         adminToUpdate.setBirthDate(admin.getBirthDate());
         adminToUpdate.setGender(admin.getGender());
-        adminToUpdate.setUsername(admin.getUsername());
         adminToUpdate.setPhone(admin.getPhone());
         adminToUpdate.setAddress(admin.getAddress());
         adminToUpdate.setImage(admin.getImage());

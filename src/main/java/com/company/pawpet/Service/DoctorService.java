@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -58,7 +59,6 @@ public class DoctorService {
         doctorToUpdate.setLastname(doctor.getLastname());
         doctorToUpdate.setBirthDate(doctor.getBirthDate());
         doctorToUpdate.setGender(doctor.getGender());
-        doctorToUpdate.setUsername(doctor.getUsername());
         doctorToUpdate.setPhone(doctor.getPhone());
         doctorToUpdate.setAddress(doctor.getAddress());
         doctorToUpdate.setSpecialization(doctor.getSpecialization());

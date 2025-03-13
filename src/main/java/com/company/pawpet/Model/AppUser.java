@@ -1,23 +1,13 @@
 package com.company.pawpet.Model;
 
-
-
 import com.company.pawpet.Enum.Role;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
-import lombok.Getter;
-import lombok.Setter;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-
-import java.awt.*;
-import java.lang.annotation.Inherited;
-import java.sql.Blob;
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -29,28 +19,19 @@ public class AppUser implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     int AppUserId;
-    @NotBlank(message = "First name is required")
-    @Size(min = 2, max = 50, message = "First name must be between 2 and 50 characters")
     String firstname;
-    @NotBlank(message = "Last name is required")
-    @Size(min = 2, max = 50, message = "Last name must be between 2 and 50 characters")
     String lastname;
 
     @Lob
     private byte[] image;
 
-    @NotNull(message = "Birth date is required")
-    @Past(message = "Birth date must be in the past")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private LocalDate birthDate;
-    @NotNull(message = "Gender is required")
+    private LocalDate birthDate ;
     String gender;
 
     @Email
     @Column (unique = true,nullable = false)
     String username;
-    @Min(value = 10000000, message = "Phone number must be at least 8 digits")
-    @Column (unique = true,nullable = false)
     int phone;
 
     @Enumerated(EnumType.STRING)
