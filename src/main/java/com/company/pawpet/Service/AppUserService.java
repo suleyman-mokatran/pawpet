@@ -1,7 +1,10 @@
 package com.company.pawpet.Service;
 
+import aj.org.objectweb.asm.commons.Remapper;
 import com.company.pawpet.Enum.Role;
 import com.company.pawpet.Model.AppUser;
+import com.company.pawpet.Model.Pet;
+import com.company.pawpet.Repository.PetRepository;
 import com.company.pawpet.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -16,6 +19,9 @@ public class AppUserService{
 
     @Autowired
     UserRepository appUserRepository;
+
+    @Autowired
+    PetRepository petRepository;
 
     final BCryptPasswordEncoder passwordEncoder;
 
@@ -59,7 +65,6 @@ public class AppUserService{
         userToUpdate.setLastname(user.getLastname());
         userToUpdate.setBirthDate(user.getBirthDate());
         userToUpdate.setGender(user.getGender());
-        userToUpdate.setUsername(user.getUsername());
         userToUpdate.setPhone(user.getPhone());
         userToUpdate.setAddress(user.getAddress());
         userToUpdate.setImage(user.getImage());
@@ -77,4 +82,7 @@ public class AppUserService{
     public AppUser findByUsername(String username) {
         return appUserRepository.findByUsername(username);
     }
+
+
+
 }

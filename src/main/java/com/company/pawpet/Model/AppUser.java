@@ -1,6 +1,7 @@
 package com.company.pawpet.Model;
 
 import com.company.pawpet.Enum.Role;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -43,7 +44,7 @@ public class AppUser implements UserDetails {
     public AppUser() {
     }
 
-    public AppUser(String password, String address, Role role, int phone, String username, String gender, LocalDate birthDate, String lastname, String firstname,byte[] image) {
+    public AppUser(String password, String address, Role role, int phone, String username, String gender, LocalDate birthDate, String lastname, String firstname,byte[] image,List<Pet> pets) {
         this.password = password;
         this.address = address;
         this.role = role;
@@ -54,13 +55,17 @@ public class AppUser implements UserDetails {
         this.lastname = lastname;
         this.firstname = firstname;
         this.image = image;
+        petList = pets;
     }
 
     @OneToMany(mappedBy = "appUser", cascade = CascadeType.ALL)
     private List<Appointment> appointmentList;
 
+    @ElementCollection
+    @JsonManagedReference
     @OneToMany(mappedBy = "appUser", cascade = CascadeType.ALL)
     private List<Pet> petList;
+
 
     @OneToMany(mappedBy = "appUser", cascade = CascadeType.ALL)
     private List<Pet> AdoptedPets;

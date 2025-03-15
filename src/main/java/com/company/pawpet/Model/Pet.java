@@ -1,11 +1,14 @@
 package com.company.pawpet.Model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 
 @Entity
 @Table(name = "pets")
@@ -15,16 +18,28 @@ public class Pet {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     int PetId;
 
+    @Lob
+    private byte[] image;
+
     String PetName;
     String Gender;
     String Status;
     int Weight;
     int Age;
+
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    LocalDate VaccinationRecord;
-    String MedicalConditions;
-    String Allergies;
-    String DietaryPreferences;
+    @ElementCollection
+    Map<String,LocalDate> VaccinationRecord;
+
+    @ElementCollection
+    private List<String> medicalConditions;
+
+    @ElementCollection
+    List<String> Allergies;
+
+    @ElementCollection
+    List<String> DietaryPreferences;
+
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     LocalDate LastVetVisit;
     @DateTimeFormat(pattern = "yyyy-MM-dd")
@@ -35,7 +50,8 @@ public class Pet {
     LocalDateTime CreatedAt;
 
     @ManyToOne
-    @JoinColumn(name = "PetUserId")
+    @JoinColumn(name = "petUserId")
+    @JsonBackReference
     private AppUser appUser;
 
     @ManyToOne
@@ -46,7 +62,31 @@ public class Pet {
     @JoinColumn(name = "CategoryId")
     private Category PetCategory;
 
+    public Pet() {
+    }
 
+    public Pet(byte[] image, String petName, String gender, String status, int weight, int age,
+               Map<String,LocalDate> vaccinationRecord, List<String> medicalConditions, List<String> allergies,
+               List<String> dietaryPreferences, LocalDate lastVetVisit, LocalDate nextVetVisit, LocalDateTime createdAt) {
+
+        this.image = image;
+        this.PetName = petName;
+        this.Gender = gender;
+        this.Status = status;
+        this.Weight = weight;
+        this.Age = age;
+        this.VaccinationRecord = vaccinationRecord;
+        this.medicalConditions = medicalConditions;
+        this.Allergies = allergies;
+        this.DietaryPreferences = dietaryPreferences;
+        this.LastVetVisit = lastVetVisit;
+        this.NextVetVisit = nextVetVisit;
+        this.CreatedAt = createdAt;
+    }
+
+    public byte[] getImage() {return image;}
+
+    public void setImage(byte[] image) {this.image = image;}
 
     public int getPetId() {
         return PetId;
@@ -96,11 +136,11 @@ public class Pet {
         Age = age;
     }
 
-    public LocalDate getVaccinationRecord() {
+    public Map<String,LocalDate> getVaccinationRecord() {
         return VaccinationRecord;
     }
 
-    public void setVaccinationRecord(LocalDate vaccinationRecord) {
+    public void setVaccinationRecord(Map<String,LocalDate> vaccinationRecord) {
         VaccinationRecord = vaccinationRecord;
     }
 
@@ -120,27 +160,23 @@ public class Pet {
         NextVetVisit = nextVetVisit;
     }
 
-    public String getMedicalConditions() {
-        return MedicalConditions;
-    }
+    public List<String> getMedicalConditions() {return medicalConditions;}
 
-    public void setMedicalConditions(String medicalConditions) {
-        MedicalConditions = medicalConditions;
-    }
+    public void setMedicalConditions(List<String> medicalConditions) {this.medicalConditions = medicalConditions;}
 
-    public String getAllergies() {
+    public List<String> getAllergies() {
         return Allergies;
     }
 
-    public void setAllergies(String allergies) {
+    public void setAllergies(List<String> allergies) {
         Allergies = allergies;
     }
 
-    public String getDietaryPreferences() {
+    public List<String> getDietaryPreferences() {
         return DietaryPreferences;
     }
 
-    public void setDietaryPreferences(String dietaryPreferences) {
+    public void setDietaryPreferences(List<String> dietaryPreferences) {
         DietaryPreferences = dietaryPreferences;
     }
 

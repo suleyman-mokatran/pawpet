@@ -1,7 +1,9 @@
 package com.company.pawpet.Service;
 
+import com.company.pawpet.Model.AppUser;
 import com.company.pawpet.Model.Pet;
 import com.company.pawpet.Repository.PetRepository;
+import com.company.pawpet.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,9 +17,31 @@ public class PetService {
     @Autowired
     PetRepository petRepository;
 
-    public Pet addNewPet(Pet pet){
-        pet.setCreatedAt(LocalDateTime.now());
-        return petRepository.save(pet);
+    @Autowired
+    UserRepository appUserRepository;
+
+    public Pet addNewPet(Pet pet, int userId){
+
+        Pet newPet = new Pet();
+        newPet.setPetName(pet.getPetName());
+        newPet.setCreatedAt(LocalDateTime.now());
+        newPet.setImage(pet.getImage());
+        newPet.setGender(pet.getGender());
+        newPet.setStatus(pet.getStatus());
+        newPet.setWeight(pet.getWeight());
+        newPet.setAge(pet.getAge());
+        newPet.setVaccinationRecord(pet.getVaccinationRecord());
+        newPet.setMedicalConditions(pet.getMedicalConditions());
+        newPet.setAllergies(pet.getAllergies());
+        newPet.setDietaryPreferences(pet.getDietaryPreferences());
+        newPet.setLastVetVisit(pet.getLastVetVisit());
+        Optional<AppUser> appUser = appUserRepository.findById(userId);
+        if (appUser.isPresent()) {
+            newPet.setAppUser(appUser.get());
+        } else {
+            throw new RuntimeException("User not found");
+        }
+        return petRepository.save(newPet);
     }
     public List<Pet> getAllPets() {
         return petRepository.findAll();
@@ -62,5 +86,9 @@ public class PetService {
 
         return petRepository.save(petToUpdate);
     }
+
+    public List<Pet> getAllPets(int id) {
+        return petRepository.findPetsByUserId(id);}
+
 
 }

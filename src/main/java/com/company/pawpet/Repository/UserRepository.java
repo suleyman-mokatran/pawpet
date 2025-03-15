@@ -2,12 +2,14 @@ package com.company.pawpet.Repository;
 
 import com.company.pawpet.Enum.Role;
 import com.company.pawpet.Model.AppUser;
+import com.company.pawpet.Model.Pet;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 @Repository
+@EnableJpaRepositories
 public interface UserRepository extends JpaRepository<AppUser, Integer> {
     AppUser findByUsername(String username);
 
