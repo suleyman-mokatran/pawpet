@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/sp")
+@CrossOrigin(origins = "http://localhost:3000")
 @PreAuthorize("hasRole('SP')")
 public class SPController {
 

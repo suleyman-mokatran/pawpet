@@ -19,9 +19,11 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 
+
 @RestController
 @RequestMapping("/doctor")
 @PreAuthorize("hasRole('DOCTOR')")
+@CrossOrigin(origins = "http://localhost:3000")
 public class DoctorController {
 
     @Autowired

@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/pp")
+@CrossOrigin(origins = "http://localhost:3000")
 @PreAuthorize("hasRole('PP')")
 public class PPController {
 
