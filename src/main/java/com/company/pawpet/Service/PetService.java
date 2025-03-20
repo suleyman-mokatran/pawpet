@@ -1,13 +1,16 @@
 package com.company.pawpet.Service;
 
 import com.company.pawpet.Model.AppUser;
+import com.company.pawpet.Model.Category;
 import com.company.pawpet.Model.Pet;
+import com.company.pawpet.Repository.CategoryRepository;
 import com.company.pawpet.Repository.PetRepository;
 import com.company.pawpet.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,7 +23,16 @@ public class PetService {
     @Autowired
     UserRepository appUserRepository;
 
-    public Pet addNewPet(Pet pet, int userId){
+    @Autowired
+    CategoryRepository categoryRepository;
+
+    @Autowired
+    CategoryService categoryService;
+
+    public Pet addNewPet(Pet pet, int userId,int categoryId){
+
+        Optional<Category> category = categoryService.findById(categoryId);
+
 
         Pet newPet = new Pet();
         newPet.setPetName(pet.getPetName());
@@ -33,8 +45,10 @@ public class PetService {
         newPet.setVaccinationRecord(pet.getVaccinationRecord());
         newPet.setMedicalConditions(pet.getMedicalConditions());
         newPet.setAllergies(pet.getAllergies());
+        newPet.setPetCategory(pet.getPetCategory());
         newPet.setDietaryPreferences(pet.getDietaryPreferences());
         newPet.setLastVetVisit(pet.getLastVetVisit());
+        newPet.setPetCategory(category.orElse(null));
         Optional<AppUser> appUser = appUserRepository.findById(userId);
         if (appUser.isPresent()) {
             newPet.setAppUser(appUser.get());
@@ -63,12 +77,13 @@ public class PetService {
         return petRepository.findPetByStatus(status);
     }
 
-    public Pet updatePet( int id,Pet pet ){
+    public Pet updatePet( int id,int categoryId,Pet pet ){
         Optional<Pet> existingPet = petRepository.findById(id);
 
         if (existingPet.isEmpty()) {
             throw new RuntimeException("Pet with ID " + id + " not found.");
         }
+        Optional<Category> category = categoryService.findById(categoryId);
 
         Pet petToUpdate = existingPet.get();
 
@@ -82,13 +97,15 @@ public class PetService {
         petToUpdate.setAllergies(pet.getAllergies());
         petToUpdate.setDietaryPreferences(pet.getDietaryPreferences());
         petToUpdate.setLastVetVisit(pet.getLastVetVisit());
-        petToUpdate.setNextVetVisit(pet.getNextVetVisit());
+        petToUpdate.setPetCategory(category.orElse(null));
+
 
         return petRepository.save(petToUpdate);
     }
 
     public List<Pet> getAllPets(int id) {
         return petRepository.findPetsByUserId(id);}
+
 
 
 }

@@ -80,6 +80,19 @@ public class AppUser implements UserDetails {
     @JoinColumn(name = "CartId", referencedColumnName = "CartId")
     private Cart cart;
 
+    public AppUser(String firstname, String lastname, byte[] image, LocalDate birthDate, String gender, String username, int phone, Role role, String address, String password) {
+        this.firstname = firstname;
+        this.lastname = lastname;
+        this.image = image;
+        this.birthDate = birthDate;
+        this.gender = gender;
+        this.username = username;
+        this.phone = phone;
+        this.role = role;
+        this.address = address;
+        this.password = password;
+    }
+
     public int getAppUserId() {
         return AppUserId;
     }

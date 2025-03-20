@@ -1,5 +1,6 @@
 package com.company.pawpet.Model;
 
+import com.company.pawpet.Enum.Role;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -14,6 +15,10 @@ public class Doctor extends AppUser {
     @ElementCollection
     private Map<String, String> availableDays;
     int experienceYears;
+
+    public Doctor() {
+    }
+
 
 
     @OneToMany(mappedBy = "Doctor", cascade = CascadeType.ALL)

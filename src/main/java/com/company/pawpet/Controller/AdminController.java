@@ -16,6 +16,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/admin")
 @PreAuthorize("hasRole('ADMIN')")
@@ -136,13 +138,14 @@ public class AdminController {
     CategoryService categoryService;
 
     @PostMapping("/addpetcategory")
-    public ResponseEntity<?> addNewPetCategory(@Valid @RequestBody Category category, @RequestParam String categoryName, BindingResult result) {
+    public ResponseEntity<?> addNewPetCategory( @RequestBody @Valid Category category, BindingResult result) {
         if (result.hasErrors()) {
             return ResponseEntity.badRequest().body(result.getAllErrors());
         }
-        Category savedCategory = categoryService.addNewPetCategory(category, categoryName);
+        Category savedCategory = categoryService.addNewPetCategory(category);
         return ResponseEntity.ok(savedCategory);
     }
+
 
     @PostMapping("/addproductcategory")
     public ResponseEntity<?> addNewProductCategory(@Valid @RequestBody Category category,
@@ -161,14 +164,16 @@ public class AdminController {
                 .map(ResponseEntity::ok)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found"));
     }
-    @GetMapping("/getcategories")
-    public List<Category> getAllCategories(){
-        return categoryService.getAllCategories();
+
+    @GetMapping("/getpetcategories")
+    public List<Map<String,String>> findPetCategories(){
+        return categoryService.findPetCategory();
     }
+
 
     @PutMapping("/updatecategory/{id}")
     public ResponseEntity<Category> updateCategory(@PathVariable int id, @RequestBody Category categoryDetails) {
-        Category updatedCategory = categoryService.updateCategory(id, categoryDetails.getName());
+        Category updatedCategory = new Category();
         return ResponseEntity.ok(updatedCategory);
     }
 

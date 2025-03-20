@@ -1,35 +1,46 @@
 package com.company.pawpet.Model;
 
+import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Entity
 
 @Table(name = "categories")
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "categoryId")
+
 public class Category {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     int categoryId;
 
-
-    private String name;
+    @ElementCollection
+    @JsonProperty("MSCategory")
+    private Map<String , String> MSCategory;
 
     String type;
 
-    @OneToMany(mappedBy = "PetCategory", cascade = CascadeType.ALL)
+    public Category() {
+    }
+
+
+
+    @OneToMany(mappedBy = "PetCategory", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonBackReference  // ✅ Prevents infinite loop
     private List<Pet> petList;
 
     @OneToMany(mappedBy = "ProductCategory", cascade = CascadeType.ALL)
     private List<Product> productList;
 
-    public String getName() {
-        return name;
+    public Map<String, String> getMSCategory() {
+        return MSCategory;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setMSCategory(Map<String, String> MSCategory) {
+        this.MSCategory = MSCategory;
     }
 
     public int getCategoryId() {

@@ -1,12 +1,16 @@
 package com.company.pawpet.Controller;
 
 import com.company.pawpet.Model.AppUser;
+import com.company.pawpet.Model.Category;
 import com.company.pawpet.Model.Doctor;
 import com.company.pawpet.Model.Pet;
 import com.company.pawpet.PasswordUpdateRequest;
 import com.company.pawpet.Repository.UserRepository;
 import com.company.pawpet.Service.AppUserService;
+import com.company.pawpet.Service.CategoryService;
+import com.company.pawpet.Service.DoctorService;
 import com.company.pawpet.Service.PetService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -33,6 +38,12 @@ public class UserController {
 
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    CategoryService categoryService;
+
+    @Autowired
+    DoctorService doctorService;
 
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
@@ -95,12 +106,51 @@ public class UserController {
         petService.deletePet(id);
     }
 
-    @PostMapping("/addpet/{id}")
-    public ResponseEntity<?> addNewPet(@PathVariable int id , @RequestBody Pet pet, BindingResult result) {
+    @PostMapping("/addpet/{id}/{categoryId}")
+    public ResponseEntity<?> addNewPet(@PathVariable int id ,@PathVariable int categoryId, @RequestBody Pet pet, BindingResult result) {
         if (result.hasErrors()) {
             return ResponseEntity.badRequest().body(result.getAllErrors());
         }
-        Pet savedPet = petService.addNewPet(pet,id);
+
+        Pet savedPet = petService.addNewPet(pet,id,categoryId);
         return ResponseEntity.ok(savedPet);
     }
+
+    @PutMapping("/updatepet/{id}/{categoryId}")
+    public ResponseEntity<?> updatePet(@PathVariable int id,@PathVariable int categoryId, @RequestBody Pet pet, BindingResult result){
+        if (result.hasErrors()) {
+            return ResponseEntity.badRequest().body(result.getAllErrors());
+        }
+        Pet savedPet = petService.updatePet(id,categoryId,pet);
+        return ResponseEntity.ok(savedPet);
+    }
+    @GetMapping("/getpet/{id}")
+    public ResponseEntity<Pet> getPetById(@PathVariable int id) {
+        return petService.getPetById(id).map(ResponseEntity::ok).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Pet not found"));
+    }
+
+    @GetMapping("/getpetcategories")
+    public List<Map<String,String>> findPetCategories(){
+        return categoryService.findPetCategory();
+    }
+
+    @GetMapping("/getcategory/{id}")
+    public ResponseEntity<Category> getCategoryById(@PathVariable int id) {
+        return categoryService.findById(id).map(ResponseEntity::ok).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found"));
+    }
+
+    @GetMapping("/getspecializations")
+    public ResponseEntity<List<String>> getSpecializations() {
+        List<String> specializations =doctorService.getAllSpecializations();
+        return ResponseEntity.ok(specializations);
+    }
+
+    @GetMapping("/getspecializeddoctors/{specialization}")
+    public ResponseEntity<List<Doctor>> getDoctorsBySpecialization(@PathVariable String specialization) {
+        List<Doctor> doctors =doctorService.findDoctorsBySpecialization(specialization);
+        return ResponseEntity.ok(doctors);
+    }
+
+
+
 }

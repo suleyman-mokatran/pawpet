@@ -79,12 +79,27 @@ public class DoctorService {
         return doctorRepository.findById(doctorId);
     }
 
-    public List<Doctor> findDoctorsBySpecialization(Doctor doctor){
-        return doctorRepository.findDoctorBySpecialization(doctor.getSpecialization());
+    public List<Doctor> findDoctorsBySpecialization(String specialization){
+
+        return doctorRepository.findDoctorBySpecialization(specialization);
     }
 
     public Doctor findByUsername(String username) {
         return doctorRepository.findByUsername(username);
+    }
+
+    public List<String> getAllSpecializations(){
+        return doctorRepository.findSpecializations();
+    }
+
+    public String getAvailableDay(String day,int doctorId){
+        String available = doctorRepository.findByDayAndDoctorId(day,doctorId);
+        if(available.isEmpty() || available==null){
+            return "This Day is not working day";
+        }
+        else{
+            return available;
+        }
     }
 }
 

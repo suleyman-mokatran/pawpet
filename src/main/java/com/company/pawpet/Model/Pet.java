@@ -1,6 +1,6 @@
 package com.company.pawpet.Model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -12,16 +12,19 @@ import java.util.Map;
 
 @Entity
 @Table(name = "pets")
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "petId")
 public class Pet {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    int PetId;
+    int petId;
 
     @Lob
     private byte[] image;
 
+    @JsonProperty("PetName")
     String PetName;
+
     String Gender;
     String Status;
     int Weight;
@@ -52,15 +55,19 @@ public class Pet {
     @ManyToOne
     @JoinColumn(name = "petUserId")
     @JsonBackReference
+    @JsonProperty("petUserId")
     private AppUser appUser;
 
     @ManyToOne
     @JoinColumn(name = "AdopterId")
     private AppUser Adopter;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "CategoryId")
+    @JsonProperty("petCategory")  // ✅ Rename JSON field to "petCategory"
+    //@JsonManagedReference  // ✅ Managed reference for forward serialization
     private Category PetCategory;
+
 
     public Pet() {
     }
@@ -84,16 +91,17 @@ public class Pet {
         this.CreatedAt = createdAt;
     }
 
+
     public byte[] getImage() {return image;}
 
     public void setImage(byte[] image) {this.image = image;}
 
     public int getPetId() {
-        return PetId;
+        return petId;
     }
 
     public void setPetId(int petId) {
-        PetId = petId;
+        petId = petId;
     }
 
     public String getPetName() {

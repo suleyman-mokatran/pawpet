@@ -3,8 +3,9 @@ package com.company.pawpet.Model;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 @Entity
 @Table(name = "appointment")
@@ -15,12 +16,19 @@ public class Appointment {
     int AppointmentId;
     float price;
     long duration;
-    String Status;
+    boolean booked = false;
 
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private LocalDateTime startTime;
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private LocalDateTime endTime;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+   private LocalDate selectedDate;
+
+    private String startTime;
+
+    private String endTime;
+
+
+    public DayOfWeek getDayOfWeek() {
+        return selectedDate.getDayOfWeek();
+    }
 
     @ManyToOne
     @JoinColumn(name = "AppUserId")
@@ -31,7 +39,7 @@ public class Appointment {
     private ServiceModel Service;
 
     @ManyToOne
-    @JoinColumn(name = "DoctorId")
+    @JoinColumn(name = "doctorId", referencedColumnName = "app_user_id")
     private Doctor doctor;
 
     public int getAppointmentId() {
@@ -40,7 +48,11 @@ public class Appointment {
 
     public long getDuration() {
         if (startTime != null && endTime != null) {
-            return Duration.between(startTime, endTime).toMinutes();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("hh:mm a", Locale.ENGLISH);
+            LocalTime startRange = LocalTime.parse(startTime, formatter);
+            LocalTime endRange = LocalTime.parse(endTime, formatter);
+
+            return Duration.between(startRange, endRange).toMinutes();
         }else{
             return 0;}
     }
@@ -49,21 +61,6 @@ public class Appointment {
         this.duration = duration;
     }
 
-    public LocalDateTime getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(LocalDateTime startTime) {
-        this.startTime = startTime;
-    }
-
-    public LocalDateTime getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(LocalDateTime endTime) {
-        this.endTime = endTime;
-    }
 
     public void setAppointmentId(int appointmentId) {
         AppointmentId = appointmentId;
@@ -78,13 +75,36 @@ public class Appointment {
     }
 
 
-
-    public String getStatus() {
-        return Status;
+    public boolean isBooked() {
+        return booked;
     }
 
-    public void setStatus(String status) {
-        Status = status;
+    public void setBooked(boolean booked) {
+        this.booked = booked;
+    }
+
+    public LocalDate getSelectedDate() {
+        return selectedDate;
+    }
+
+    public void setSelectedDate(LocalDate selectedDate) {
+        this.selectedDate = selectedDate;
+    }
+
+    public String getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(String startTime) {
+        this.startTime = startTime;
+    }
+
+    public String getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(String endTime) {
+        this.endTime = endTime;
     }
 
     public AppUser getAppUser() {

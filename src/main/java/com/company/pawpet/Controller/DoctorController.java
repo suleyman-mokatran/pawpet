@@ -1,9 +1,11 @@
 package com.company.pawpet.Controller;
 
 import com.company.pawpet.Model.AppUser;
+import com.company.pawpet.Model.Appointment;
 import com.company.pawpet.Model.Doctor;
 import com.company.pawpet.PasswordUpdateRequest;
 import com.company.pawpet.Repository.DoctorRepository;
+import com.company.pawpet.Service.AppointmentService;
 import com.company.pawpet.Service.DoctorService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.Optional;
 
 
@@ -34,6 +37,9 @@ public class DoctorController {
 
     @Autowired
     DoctorRepository doctorRepository;
+
+    @Autowired
+    AppointmentService appointmentService;
 
     @GetMapping("/profile")
     public ResponseEntity<Doctor> getUserProfile(@AuthenticationPrincipal UserDetails userDetails) {
@@ -78,4 +84,37 @@ public class DoctorController {
     public ResponseEntity<Doctor> getDoctorById(@PathVariable int id) {
         return doctorService.findById(id).map(ResponseEntity::ok).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Doctor not found"));
     }
+
+    @PostMapping("/addappointment/{id}")
+    public ResponseEntity<?> addNewAppointment(@PathVariable int id,@RequestBody Appointment appointment, BindingResult result){
+        if (result.hasErrors()) {
+            return ResponseEntity.badRequest().body(result.getAllErrors());
+        }
+        Appointment newAppointment = appointmentService.addNewAppointment(id,appointment);
+        return ResponseEntity.ok(newAppointment);
+    }
+
+    @GetMapping("/getappointments/{id}")
+    public ResponseEntity<List<Appointment>> getAppointments(@PathVariable int id){
+        List<Appointment> appointments = appointmentService.findAppointmentsByDoctorId(id);
+        return ResponseEntity.ok(appointments);
+    }
+
+    @GetMapping("/getworkingtimebyday/{day}/{id}")
+    public ResponseEntity<String> getWorkingTime(@PathVariable String day, @PathVariable int id){
+        String time =  appointmentService.getWorkingTimeByDay(day,id);
+        return ResponseEntity.ok(time);
+    }
+
+    @PutMapping("/updateappointment/{id}")
+    public ResponseEntity<Appointment> updateAppointment(@PathVariable int id,@RequestBody Appointment appointment){
+        Appointment savedAppointment =  appointmentService.updateAppointment(id,appointment);
+        return ResponseEntity.ok(savedAppointment);
+    }
+
+    @DeleteMapping("/deleteappointment/{id}")
+    public void deleteAppointment(@PathVariable int id){
+         appointmentService.DeleteAppointment(id);
+    }
+
 }
