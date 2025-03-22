@@ -117,4 +117,10 @@ public class DoctorController {
          appointmentService.DeleteAppointment(id);
     }
 
+    @GetMapping("/getappointment/{id}")
+    public ResponseEntity<Appointment> getAppointmentById(@PathVariable int id){
+        Appointment  appointment = appointmentService.getAppointment(id);
+        return ResponseEntity.ok(appointment);
+    }
+
 }

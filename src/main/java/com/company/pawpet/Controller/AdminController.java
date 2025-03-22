@@ -158,11 +158,11 @@ public class AdminController {
         Category savedCategory = categoryService.addNewProductCategory(category, categoryName);
         return ResponseEntity.ok(savedCategory);
     }
+
     @GetMapping("/getcategory/{id}")
     public ResponseEntity<Category> getCategoryById(@PathVariable int id) {
-        return categoryService.findById(id)
-                .map(ResponseEntity::ok)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found"));
+        Category petCategory =  categoryService.findById(id);
+        return ResponseEntity.ok(petCategory);
     }
 
     @GetMapping("/getpetcategories")
@@ -172,9 +172,8 @@ public class AdminController {
 
 
     @PutMapping("/updatecategory/{id}")
-    public ResponseEntity<Category> updateCategory(@PathVariable int id, @RequestBody Category categoryDetails) {
-        Category updatedCategory = new Category();
-        return ResponseEntity.ok(updatedCategory);
+    public ResponseEntity<Category> updateCategory(@PathVariable int id,@RequestBody Category category) {
+        return ResponseEntity.ok(categoryService.updateCategory(id,category));
     }
 
 

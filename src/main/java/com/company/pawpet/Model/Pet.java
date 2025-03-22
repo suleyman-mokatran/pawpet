@@ -64,9 +64,11 @@ public class Pet {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "CategoryId")
-    @JsonProperty("petCategory")  // ✅ Rename JSON field to "petCategory"
-    //@JsonManagedReference  // ✅ Managed reference for forward serialization
+    @JsonProperty("petCategory")
     private Category PetCategory;
+
+    @OneToMany(mappedBy = "pet", cascade = CascadeType.ALL)
+    private List<Appointment> appointmentList;
 
 
     public Pet() {
@@ -91,6 +93,13 @@ public class Pet {
         this.CreatedAt = createdAt;
     }
 
+    public List<Appointment> getAppointmentList() {
+        return appointmentList;
+    }
+
+    public void setAppointmentList(List<Appointment> appointmentList) {
+        this.appointmentList = appointmentList;
+    }
 
     public byte[] getImage() {return image;}
 

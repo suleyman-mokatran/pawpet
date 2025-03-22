@@ -1,12 +1,17 @@
 package com.company.pawpet.Service;
 
 
+import com.company.pawpet.Model.AppUser;
 import com.company.pawpet.Model.Appointment;
 import com.company.pawpet.Model.Doctor;
+import com.company.pawpet.Model.Pet;
 import com.company.pawpet.Repository.AppointmentRepository;
 import com.company.pawpet.Repository.DoctorRepository;
+import com.company.pawpet.Repository.PetRepository;
+import com.company.pawpet.Repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
@@ -26,6 +31,12 @@ public class AppointmentService {
 
     @Autowired
     DoctorRepository doctorRepository;
+
+    @Autowired
+    UserRepository appUserRepository;
+
+    @Autowired
+    PetRepository petRepository;
 
     public Appointment addNewAppointment(int id ,Appointment appointment){
 
@@ -48,8 +59,8 @@ public class AppointmentService {
         return appointmentRepository.save(savedAppointment);
     }
 
-    public Optional<Appointment> getAppointment(int appointmentId){
-        return appointmentRepository.findById(appointmentId);
+    public Appointment getAppointment(int appointmentId){
+        return appointmentRepository.findById(appointmentId).orElseThrow();
     }
 
     public Appointment updateAppointment(int id , Appointment appointment){
@@ -65,6 +76,8 @@ public class AppointmentService {
         appointmentToUpdate.setBooked(appointment.isBooked());
         appointmentToUpdate.setStartTime(appointment.getStartTime());
         appointmentToUpdate.setEndTime(appointment.getEndTime());
+        appointmentToUpdate.setSelectedDate(appointment.getSelectedDate());
+
 
         return appointmentRepository.save(appointmentToUpdate);
     }
@@ -96,10 +109,37 @@ public class AppointmentService {
         return appointmentRepository.findAppointmentsByDoctor(id);
     }
 
+    public List<Appointment> findAppointmentsByUserId(int id){
+        return appointmentRepository.findAppointmentsByUser(id);
+    }
+
     public String getWorkingTimeByDay(String day,int id){
         return doctorRepository.findByDayAndDoctorId(day,id);
     }
 
+    public Appointment bookAppointment(int userId,int doctorId, int petId, int appointmentId){
+        Appointment existingAppointment = appointmentRepository.findById(appointmentId).orElseThrow();
+        AppUser existingUser = appUserRepository.findById(userId).orElseThrow();
+        Doctor existingDoctor = doctorRepository.findById(doctorId).orElseThrow();
+        Pet existingPet = petRepository.findById(petId).orElseThrow();
 
+        Appointment updatedAppointment = existingAppointment;
+        updatedAppointment.setAppUser(existingUser);
+        updatedAppointment.setDoctor(existingDoctor);
+        updatedAppointment.setPet(existingPet);
+        updatedAppointment.setBooked(true);
+
+       return appointmentRepository.save(updatedAppointment);
+    }
+
+    public Appointment unbookAppointment(int id) {
+        Appointment appointment = appointmentRepository.findById(id).orElseThrow();
+
+        appointment.setBooked(false);
+        appointment.setAppUser(null);
+        appointment.setPet(null);
+
+       return appointmentRepository.save(appointment); // Save changes
+    }
 }
 

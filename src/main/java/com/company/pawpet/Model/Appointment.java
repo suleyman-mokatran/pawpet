@@ -1,10 +1,12 @@
 package com.company.pawpet.Model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Locale;
 
 @Entity
@@ -32,6 +34,7 @@ public class Appointment {
 
     @ManyToOne
     @JoinColumn(name = "AppUserId")
+    @JsonBackReference
     private AppUser appUser;
 
     @ManyToOne
@@ -41,6 +44,10 @@ public class Appointment {
     @ManyToOne
     @JoinColumn(name = "doctorId", referencedColumnName = "app_user_id")
     private Doctor doctor;
+
+    @ManyToOne
+    @JoinColumn(name = "petId")
+    private Pet pet;
 
     public int getAppointmentId() {
         return AppointmentId;
@@ -55,6 +62,14 @@ public class Appointment {
             return Duration.between(startRange, endRange).toMinutes();
         }else{
             return 0;}
+    }
+
+    public Pet getPet() {
+        return pet;
+    }
+
+    public void setPet(Pet pet) {
+        this.pet = pet;
     }
 
     public void setDuration(long duration) {

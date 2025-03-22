@@ -25,15 +25,14 @@ public class CategoryService {
     }
 
     public Category addNewProductCategory(Category category, String categoryName) {
-        category.setType("PRODUCT");  // Set the category type to PRODUCT
-        //category.setName(categoryName);  // Set the name of the category
-        return categoryRepository.save(category);  // Save the category to the database
+        category.setType("PRODUCT");
+        return categoryRepository.save(category);
     }
 
 
 
 
-    public Category updateCategory(int id, String categoryName) {
+    public Category updateCategory(int id, Category category) {
         Optional<Category> existingCategory = categoryRepository.findById(id);
 
         if (existingCategory.isEmpty()) {
@@ -41,8 +40,7 @@ public class CategoryService {
         }
 
         Category categoryToUpdate = existingCategory.get();
-
-       // categoryToUpdate.setName(categoryName);
+        categoryToUpdate.setMSCategory(category.getMSCategory());
 
         return categoryRepository.save(categoryToUpdate);
     }
@@ -61,8 +59,8 @@ public class CategoryService {
     }
 
 
-    public Optional<Category> findById( int CategoryId){
-        return categoryRepository.findById(CategoryId);
+    public Category findById( int CategoryId){
+        return categoryRepository.findById(CategoryId).orElseThrow();
     }
 
 

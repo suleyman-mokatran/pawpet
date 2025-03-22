@@ -31,7 +31,7 @@ public class PetService {
 
     public Pet addNewPet(Pet pet, int userId,int categoryId){
 
-        Optional<Category> category = categoryService.findById(categoryId);
+        Category category = categoryService.findById(categoryId);
 
 
         Pet newPet = new Pet();
@@ -48,7 +48,7 @@ public class PetService {
         newPet.setPetCategory(pet.getPetCategory());
         newPet.setDietaryPreferences(pet.getDietaryPreferences());
         newPet.setLastVetVisit(pet.getLastVetVisit());
-        newPet.setPetCategory(category.orElse(null));
+        newPet.setPetCategory(category);
         Optional<AppUser> appUser = appUserRepository.findById(userId);
         if (appUser.isPresent()) {
             newPet.setAppUser(appUser.get());
@@ -83,13 +83,14 @@ public class PetService {
         if (existingPet.isEmpty()) {
             throw new RuntimeException("Pet with ID " + id + " not found.");
         }
-        Optional<Category> category = categoryService.findById(categoryId);
+        Category category = categoryService.findById(categoryId);
 
         Pet petToUpdate = existingPet.get();
 
         petToUpdate.setPetName(pet.getPetName());
         petToUpdate.setGender(pet.getGender());
         petToUpdate.setStatus(pet.getStatus());
+        petToUpdate.setImage(pet.getImage());
         petToUpdate.setWeight(pet.getWeight());
         petToUpdate.setAge(pet.getAge());
         petToUpdate.setVaccinationRecord(pet.getVaccinationRecord());
@@ -97,7 +98,7 @@ public class PetService {
         petToUpdate.setAllergies(pet.getAllergies());
         petToUpdate.setDietaryPreferences(pet.getDietaryPreferences());
         petToUpdate.setLastVetVisit(pet.getLastVetVisit());
-        petToUpdate.setPetCategory(category.orElse(null));
+        petToUpdate.setPetCategory(category);
 
 
         return petRepository.save(petToUpdate);

@@ -59,6 +59,7 @@ public class AppUser implements UserDetails {
     }
 
     @OneToMany(mappedBy = "appUser", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<Appointment> appointmentList;
 
     @ElementCollection

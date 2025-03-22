@@ -1,15 +1,9 @@
 package com.company.pawpet.Controller;
 
-import com.company.pawpet.Model.AppUser;
-import com.company.pawpet.Model.Category;
-import com.company.pawpet.Model.Doctor;
-import com.company.pawpet.Model.Pet;
+import com.company.pawpet.Model.*;
 import com.company.pawpet.PasswordUpdateRequest;
 import com.company.pawpet.Repository.UserRepository;
-import com.company.pawpet.Service.AppUserService;
-import com.company.pawpet.Service.CategoryService;
-import com.company.pawpet.Service.DoctorService;
-import com.company.pawpet.Service.PetService;
+import com.company.pawpet.Service.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,12 +11,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.parameters.P;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -50,6 +46,9 @@ public class UserController {
 
    @Autowired
     PetService petService;
+
+   @Autowired
+    AppointmentService appointmentService;
 
     @GetMapping("/profile")
     public ResponseEntity<AppUser> getUserProfile(@AuthenticationPrincipal UserDetails userDetails) {
@@ -136,7 +135,8 @@ public class UserController {
 
     @GetMapping("/getcategory/{id}")
     public ResponseEntity<Category> getCategoryById(@PathVariable int id) {
-        return categoryService.findById(id).map(ResponseEntity::ok).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found"));
+        Category category=  categoryService.findById(id);
+        return ResponseEntity.ok(category);
     }
 
     @GetMapping("/getspecializations")
@@ -151,6 +151,63 @@ public class UserController {
         return ResponseEntity.ok(doctors);
     }
 
+    @GetMapping("/getappointments/{id}")
+    public ResponseEntity<List<Appointment>> getAppointmentsByDoctor(@PathVariable int id){
+        List<Appointment> appointmentList = appointmentService.findAppointmentsByDoctor(id);
+        List<Appointment> filteredAppointments = new ArrayList<>();
+
+        for(var appointment : appointmentList){
+            if(!appointment.isBooked()){
+                filteredAppointments.add(appointment);
+            }
+        }
+        return ResponseEntity.ok(filteredAppointments);
+    }
+
+    @GetMapping("/getappointment/{id}")
+    public ResponseEntity<Appointment> getAppointmentById(@PathVariable int id){
+        Appointment appointment = appointmentService.getAppointment(id);
+        return ResponseEntity.ok(appointment);
+    }
+
+    @GetMapping("/getpetbycategory/{id}/{category}")
+    public ResponseEntity<List<Pet>> getPetByCategory(@PathVariable int id, @PathVariable String category) {
+        List<Pet> pets = petService.getAllPets(id);
+        List<Pet> same = new ArrayList<>();
+        for (var pet : pets) {
+            Map<String, String> entry = pet.getPetCategory().getMSCategory();
+            if (!entry.isEmpty()) {
+                String firstKey = entry.keySet().iterator().next();
+                if (firstKey.equals(category)) {
+                    same.add(pet);
+                }
+            }
+        }
+            return ResponseEntity.ok(same);
+    }
+
+    @GetMapping("/getdoctor/{id}")
+    public ResponseEntity<Doctor> getDoctorById(@PathVariable int id){
+        Doctor doctor = doctorService.findById(id).orElseThrow();
+        return ResponseEntity.ok(doctor);
+    }
+
+    @PutMapping("/confirmbooking/{userId}/{doctorId}/{petId}/{appointmentId}")
+    public ResponseEntity<Appointment> confirmBooking(@PathVariable int userId,@PathVariable int doctorId,@PathVariable int petId,@PathVariable int appointmentId){
+           Appointment appointment =  appointmentService.bookAppointment(userId,doctorId,petId,appointmentId);
+             return ResponseEntity.ok(appointment);
+    }
+
+    @GetMapping("/getuserappointments/{id}")
+    public ResponseEntity<List<Appointment>> getUserAppointments(@PathVariable int id){
+        List<Appointment> appointmentList = appointmentService.findAppointmentsByUserId(id);
+        return ResponseEntity.ok(appointmentList);
+    }
+
+    @PutMapping("/unbookappointment/{id}")
+    public ResponseEntity<Appointment> unbookAppointment(@PathVariable int id) {
+        return ResponseEntity.ok(appointmentService.unbookAppointment(id));
+    }
 
 
 }
