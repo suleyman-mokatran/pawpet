@@ -51,6 +51,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**","/home/**").permitAll()
+                        .requestMatchers("/ws/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN") // Only Admins can access /admin/*
                         .requestMatchers("/user/**").hasRole("USER") // Only PetUsers can access /user/*
                         .requestMatchers("/doctor/**").hasRole("DOCTOR") // Only Doctors can access /doctor/*

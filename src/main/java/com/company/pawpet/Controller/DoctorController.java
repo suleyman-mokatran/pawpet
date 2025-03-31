@@ -3,10 +3,14 @@ package com.company.pawpet.Controller;
 import com.company.pawpet.Model.AppUser;
 import com.company.pawpet.Model.Appointment;
 import com.company.pawpet.Model.Doctor;
+import com.company.pawpet.Model.Pet;
 import com.company.pawpet.PasswordUpdateRequest;
+import com.company.pawpet.Repository.AppointmentRepository;
 import com.company.pawpet.Repository.DoctorRepository;
+import com.company.pawpet.Service.AppUserService;
 import com.company.pawpet.Service.AppointmentService;
 import com.company.pawpet.Service.DoctorService;
+import com.company.pawpet.Service.PetService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -33,6 +37,12 @@ public class DoctorController {
     DoctorService doctorService;
 
     @Autowired
+    AppointmentRepository appointmentRepository;
+
+    @Autowired
+    AppUserService appUserService;
+
+    @Autowired
     private BCryptPasswordEncoder passwordEncoder;
 
     @Autowired
@@ -40,6 +50,9 @@ public class DoctorController {
 
     @Autowired
     AppointmentService appointmentService;
+
+    @Autowired
+    PetService petService;
 
     @GetMapping("/profile")
     public ResponseEntity<Doctor> getUserProfile(@AuthenticationPrincipal UserDetails userDetails) {
@@ -118,9 +131,26 @@ public class DoctorController {
     }
 
     @GetMapping("/getappointment/{id}")
-    public ResponseEntity<Appointment> getAppointmentById(@PathVariable int id){
-        Appointment  appointment = appointmentService.getAppointment(id);
+    public ResponseEntity<List<?>> getAppointmentById(@PathVariable int id){
+        List<?>  appointment = appointmentRepository.findAppointmentById(id);
         return ResponseEntity.ok(appointment);
+    }
+
+    @GetMapping("/getappointmentbyid/{id}")
+    public ResponseEntity<Appointment> getAppointment(@PathVariable int id){
+        return ResponseEntity.ok(appointmentService.getAppointment(id));
+    }
+
+    @PutMapping("/cancelappointment/{id}")
+    public ResponseEntity<Appointment> cancelBooking(@PathVariable int id){
+    Appointment appointment = appointmentService.unbookAppointment(id);
+    return ResponseEntity.ok(appointment);
+    }
+
+    @GetMapping("/getpet/{id}")
+    public ResponseEntity<Pet> getPetById(@PathVariable int id){
+        Pet pet = petService.getPetById(id).orElseThrow();
+        return ResponseEntity.ok(pet);
     }
 
 }

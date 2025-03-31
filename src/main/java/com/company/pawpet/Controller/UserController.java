@@ -1,6 +1,7 @@
 package com.company.pawpet.Controller;
 
 import com.company.pawpet.Model.*;
+import com.company.pawpet.notification.NotificationHandler;
 import com.company.pawpet.PasswordUpdateRequest;
 import com.company.pawpet.Repository.UserRepository;
 import com.company.pawpet.Service.*;
@@ -18,6 +19,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +30,13 @@ import java.util.Optional;
 @CrossOrigin(origins = "http://localhost:3000")
 @PreAuthorize("hasRole('USER')")
 public class UserController {
+
+    private final NotificationHandler notificationHandler;
+
+    // ✅ Inject NotificationHandler using Constructor
+    public UserController(NotificationHandler notificationHandler) {
+        this.notificationHandler = notificationHandler;
+    }
 
     @Autowired
     AppUserService appUserService;
@@ -193,9 +202,14 @@ public class UserController {
     }
 
     @PutMapping("/confirmbooking/{userId}/{doctorId}/{petId}/{appointmentId}")
-    public ResponseEntity<Appointment> confirmBooking(@PathVariable int userId,@PathVariable int doctorId,@PathVariable int petId,@PathVariable int appointmentId){
+    public ResponseEntity<String> confirmBooking(@PathVariable int userId,@PathVariable int doctorId,@PathVariable int petId,@PathVariable int appointmentId) throws IOException {
            Appointment appointment =  appointmentService.bookAppointment(userId,doctorId,petId,appointmentId);
-             return ResponseEntity.ok(appointment);
+        try {
+            notificationHandler.sendNotificationToDoctor(doctorId, "New appointment booked!");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return ResponseEntity.ok("Appointment booked successfully!");
     }
 
     @GetMapping("/getuserappointments/{id}")
