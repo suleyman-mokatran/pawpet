@@ -24,8 +24,12 @@ public class CategoryService {
         return categoryRepository.save(newCategory);
     }
 
-    public Category addNewProductCategory(Category category, String categoryName) {
+    public Category addNewProductCategory(Category category) {
+
+        Category newCategory = new Category();
         category.setType("PRODUCT");
+        newCategory.setMSCategory(category.getMSCategory());
+
         return categoryRepository.save(category);
     }
 
@@ -56,6 +60,10 @@ public class CategoryService {
 
     public List<Map<String,String>> findPetCategory(){
         return categoryRepository.findAllPetCategories();
+    }
+
+    public List<Map<String,String>> findProductCategory(){
+        return categoryRepository.findAllProductCategories();
     }
 
 

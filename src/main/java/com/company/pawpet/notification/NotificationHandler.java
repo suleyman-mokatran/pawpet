@@ -1,6 +1,5 @@
 package com.company.pawpet.notification;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -8,15 +7,15 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.HashMap;
+import java.util.Map;
 
-@Component // Register as a Spring Bean
+@Component
 public class NotificationHandler extends TextWebSocketHandler {
 
     private static final Map<Integer, WebSocketSession> doctorSessions = new HashMap<>();
 
-    private final Map<Integer, Queue<String>> pendingNotifications = new HashMap<>(); // Store missed messages
+    private static final Map<Integer, WebSocketSession> userSessions = new HashMap<>();
 
 
     @Override
@@ -24,62 +23,44 @@ public class NotificationHandler extends TextWebSocketHandler {
         String query = session.getUri().getQuery();
         System.out.println("New WebSocket connection request with query: " + query);
 
-        if (query != null && query.startsWith("doctorId=")) {
-            try {
-                int doctorId = Integer.parseInt(query.split("=")[1]);
-                doctorSessions.put(doctorId, session);
-                System.out.println("✅ Doctor " + doctorId + " WebSocket session stored!");
-                System.out.println("Current doctorSessions: " + doctorSessions.keySet());
-            } catch (NumberFormatException e) {
-                System.out.println("❌ Invalid doctorId format in query: " + query);
+        if (query != null) {
+            if (query.startsWith("doctorId=")) {
+                try {
+                    int doctorId = Integer.parseInt(query.split("=")[1]);
+                    doctorSessions.put(doctorId, session);
+                    System.out.println("✅ Doctor " + doctorId + " WebSocket session stored!");
+                    System.out.println("Current doctorSessions: " + doctorSessions.keySet());
+                } catch (NumberFormatException e) {
+                    System.out.println("❌ Invalid doctorId format in query: " + query);
+                }
+            } else if (query.startsWith("userId=")) {
+                try {
+                    int userId = Integer.parseInt(query.split("=")[1]);
+                    userSessions.put(userId, session);
+                    System.out.println("✅ User " + userId + " WebSocket session stored!");
+                    System.out.println("Current userSessions: " + userSessions.keySet());
+                } catch (NumberFormatException e) {
+                    System.out.println("❌ Invalid userId format in query: " + query);
+                }
+            } else {
+                System.out.println("❌ Neither doctorId nor userId found in query: " + query);
             }
         } else {
-            System.out.println("❌ doctorId not found in query: " + query);
+            System.out.println("❌ No query string found in WebSocket request.");
         }
     }
-
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws IOException {
         System.out.println("Received: " + message.getPayload());
 
-        // If the message is a request for missed notifications
-        if (message.getPayload().equals("{\"type\":\"request_missed_notifications\"}")) {
-            int doctorId = getDoctorIdFromSession(session); // Retrieve doctorId from the session
-            List<String> missedNotifications = getMissedNotificationsForDoctor(doctorId); // Get missed notifications for doctor
-
-            // Create a response with missed notifications
-            Map<String, Object> response = new HashMap<>();
-            response.put("type", "missed_notifications");
-            response.put("notifications", missedNotifications);
-
-            String jsonResponse = new ObjectMapper().writeValueAsString(response);
-
-            // Send the missed notifications back to the client
-            session.sendMessage(new TextMessage(jsonResponse));
-            System.out.println("✅ Sent missed notifications: " + missedNotifications);
-        } else {
-            // For other messages, broadcast the received message
-            for (WebSocketSession s : doctorSessions.values()) {
-                if (s.isOpen()) {
-                    s.sendMessage(new TextMessage("Server received: " + message.getPayload()));
-                }
+        // Optional: echo or broadcast message (you can remove this if not needed)
+        for (WebSocketSession s : doctorSessions.values()) {
+            if (s.isOpen()) {
+                s.sendMessage(new TextMessage("Server received: " + message.getPayload()));
             }
         }
     }
-
-    // Dummy method to retrieve missed notifications for a specific doctor
-    private List<String> getMissedNotificationsForDoctor(int doctorId) {
-        // Replace with actual logic to fetch missed notifications
-        return Arrays.asList("New appointment scheduled!");
-    }
-
-    // Dummy method to extract doctorId from session
-    private int getDoctorIdFromSession(WebSocketSession session) {
-        // You can extract the doctorId from session attributes or any other logic
-        return 2; // Example: return the doctorId as 2 for now
-    }
-
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
@@ -98,54 +79,24 @@ public class NotificationHandler extends TextWebSocketHandler {
             session.sendMessage(new TextMessage(message));
             System.out.println("✅ Sent message: " + message);
         } else {
-            System.out.println("❌ No active WebSocket session found for doctorId: " + doctorId);
-
-            // Store message for later delivery
-            pendingNotifications.putIfAbsent(doctorId, new LinkedList<>());
-            pendingNotifications.get(doctorId).add(message);
-            System.out.println("📌 Message stored for doctorId " + doctorId);
+            System.out.println("❌ No active WebSocket session found for doctorId " + doctorId);
+            System.out.println("❌ Message NOT stored. Missed notifications are disabled.");
         }
     }
 
-    public void storeDoctorSession(int doctorId, WebSocketSession session) throws IOException {
-        System.out.println("New WebSocket connection request with query: doctorId=" + doctorId);
-        doctorSessions.put(doctorId, session);
-        System.out.println("✅ Doctor " + doctorId + " WebSocket session stored!");
-        System.out.println("Current doctorSessions: " + doctorSessions.keySet());
+    public void sendNotificationToUser(int userId, String message) throws IOException {
+        System.out.println("sendNotificationToDoctor CALLED for userId: " + userId + " with message: " + message);
 
-        // Send pending messages if any
-        if (pendingNotifications.containsKey(doctorId)) {
-            Queue<String> messages = pendingNotifications.get(doctorId);
-            while (!messages.isEmpty()) {
-                String pendingMessage = messages.poll();
-                session.sendMessage(new TextMessage(pendingMessage));
-                System.out.println("📩 Sent stored message to doctorId " + doctorId + ": " + pendingMessage);
-            }
-            pendingNotifications.remove(doctorId);
-        }
-    }
+        WebSocketSession session = userSessions.get(userId);
+        boolean sessionActive = session != null && session.isOpen();
+        System.out.println("Checking session status for user " + userId + ": " + sessionActive);
 
-    public void handleIncomingMessage(int doctorId, String message, WebSocketSession session) throws IOException {
-        System.out.println("📩 Received message from doctorId " + doctorId + ": " + message);
-
-        // Parse message (assuming JSON format)
-        if (message.contains("\"type\":\"request_missed_notifications\"")) {
-            sendMissedNotifications(doctorId, session);
-        }
-    }
-
-    private void sendMissedNotifications(int doctorId, WebSocketSession session) throws IOException {
-        if (pendingNotifications.containsKey(doctorId)) {
-            Queue<String> messages = pendingNotifications.get(doctorId);
-            while (!messages.isEmpty()) {
-                String pendingMessage = messages.poll();
-                session.sendMessage(new TextMessage(pendingMessage));
-                System.out.println("📩 Sent stored message to doctorId " + doctorId + ": " + pendingMessage);
-            }
-            pendingNotifications.remove(doctorId);
+        if (sessionActive) {
+            session.sendMessage(new TextMessage(message));
+            System.out.println("✅ Sent message: " + message);
         } else {
-            System.out.println("✅ No missed notifications for doctorId " + doctorId);
+            System.out.println("❌ No active WebSocket session found for userId " + userId);
+            System.out.println("❌ Message NOT stored. Missed notifications are disabled.");
         }
     }
-
 }

@@ -77,7 +77,7 @@ public class PetService {
         return petRepository.findPetByStatus(status);
     }
 
-    public Pet updatePet( int id,int categoryId,Pet pet ){
+    public Pet updatePet(int id,int categoryId,Pet pet ){
         Optional<Pet> existingPet = petRepository.findById(id);
 
         if (existingPet.isEmpty()) {
@@ -106,7 +106,6 @@ public class PetService {
 
     public List<Pet> getAllPets(int id) {
         return petRepository.findPetsByUserId(id);}
-
 
 
 }

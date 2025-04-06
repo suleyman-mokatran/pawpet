@@ -1,6 +1,9 @@
 package com.company.pawpet.Service;
 
+import com.company.pawpet.Model.Category;
+import com.company.pawpet.Model.Company;
 import com.company.pawpet.Model.Product;
+import com.company.pawpet.Model.ProductProvider;
 import com.company.pawpet.Repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,13 +15,36 @@ import java.util.Optional;
 public class ProductService {
     @Autowired
     ProductRepository productRepository;
+    @Autowired
+    CompanyService companyService;
 
-    public Product saveProduct(Product product) {
-        return productRepository.save(product);
+    @Autowired
+    CategoryService categoryService;
+
+    @Autowired
+    ProductProviderService productProviderService;
+
+    public Product saveProduct(int categoryId,int ppId,int companyId,Product product) {
+        Product newProduct = new Product();
+        Category category = categoryService.findById(categoryId);
+        Company company = companyService.getCompanyById(companyId).orElseThrow();
+        ProductProvider pp = productProviderService.getPPById(ppId).orElseThrow();
+
+        newProduct.setProductCategory(category);
+        newProduct.setCompany(company);
+        newProduct.setProductProvider(pp);
+        newProduct.setImage(product.getImage());
+        newProduct.setProductName(product.getProductName());
+        newProduct.setDescription(product.getDescription());
+        newProduct.setStock(product.getStock());
+        newProduct.setPrice(product.getPrice());
+
+
+        return productRepository.save(newProduct);
     }
 
-    public List<Product> getAllProducts() {
-        return productRepository.findAll();
+    public List<Product> getAllProducts(int id) {
+        return productRepository.findProductsByProviderId(id);
     }
 
     public Optional<Product> getProductById(int id) {
@@ -26,19 +52,21 @@ public class ProductService {
     }
 
 
-    public Product updateProduct(int id, Product productDetails) {
-        Optional<Product> existingProduct = productRepository.findById(id);
+    public Product updateProduct(int categoryId,int productId,int companyId, Product productDetails) {
+        Product existingProduct = productRepository.findById(productId).orElseThrow();
 
-        if (existingProduct.isEmpty()) {
-            throw new RuntimeException("Product not found");
-        }
+        Product productToUpdate = existingProduct;
+        Category category = categoryService.findById(categoryId);
+        Company company = companyService.getCompanyById(companyId).orElseThrow();
 
-        Product productToUpdate = existingProduct.get();
 
         productToUpdate.setProductName(productDetails.getProductName());
         productToUpdate.setDescription(productDetails.getDescription());
-        productToUpdate.setPrice(productDetails.getPrice());
         productToUpdate.setStock(productDetails.getStock());
+        productToUpdate.setPrice(productDetails.getPrice());
+        productToUpdate.setImage(productDetails.getImage());
+        productToUpdate.setProductCategory(category);
+        productToUpdate.setCompany(company);
 
         return productRepository.save(productToUpdate);
     }

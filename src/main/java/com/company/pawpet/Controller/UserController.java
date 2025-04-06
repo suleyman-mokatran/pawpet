@@ -20,10 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 @RequestMapping("/user")
@@ -221,6 +218,28 @@ public class UserController {
     @PutMapping("/unbookappointment/{id}")
     public ResponseEntity<Appointment> unbookAppointment(@PathVariable int id) {
         return ResponseEntity.ok(appointmentService.unbookAppointment(id));
+    }
+
+    @PutMapping("/rescheduleappointment/{oldId}/{newId}/{doctorId}")
+    public ResponseEntity<String> rescheduleAppointment(@PathVariable int oldId,
+                                                        @PathVariable int newId,
+                                                        @PathVariable int doctorId) {
+        try {
+            appointmentService.rescheduleBookedAppointment(oldId, newId);
+
+            // Send Notification BEFORE returning response
+            notificationHandler.sendNotificationToDoctor(doctorId, "An appointment has rescheduled!");
+
+            return ResponseEntity.ok("Appointment rescheduled successfully!");
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Appointment not found!");
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error sending notification: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error rescheduling appointment: " + e.getMessage());
+        }
     }
 
 

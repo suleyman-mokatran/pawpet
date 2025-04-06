@@ -55,6 +55,7 @@ public class AppointmentService {
         savedAppointment.setEndTime(appointment.getEndTime());
         savedAppointment.setStartTime(appointment.getStartTime());
         savedAppointment.setSelectedDate(appointment.getSelectedDate());
+        savedAppointment.setStatus(null);
 
         return appointmentRepository.save(savedAppointment);
     }
@@ -77,6 +78,7 @@ public class AppointmentService {
         appointmentToUpdate.setStartTime(appointment.getStartTime());
         appointmentToUpdate.setEndTime(appointment.getEndTime());
         appointmentToUpdate.setSelectedDate(appointment.getSelectedDate());
+        appointmentToUpdate.setStatus(appointment.getStatus());
 
 
         return appointmentRepository.save(appointmentToUpdate);
@@ -140,6 +142,24 @@ public class AppointmentService {
         appointment.setPet(null);
 
        return appointmentRepository.save(appointment); // Save changes
+    }
+
+    public void rescheduleBookedAppointment(int oldId,int newId){
+        Appointment oldScheduledAppointment = appointmentRepository.findById(oldId).orElseThrow();
+
+        Appointment newScheduledAppointment = appointmentRepository.findById(newId).orElseThrow();
+
+        newScheduledAppointment.setAppUser(oldScheduledAppointment.getAppUser());
+        newScheduledAppointment.setPet(oldScheduledAppointment.getPet());
+
+        oldScheduledAppointment.setBooked(false);
+        oldScheduledAppointment.setAppUser(null);
+        oldScheduledAppointment.setPet(null);
+        newScheduledAppointment.setBooked(true);
+
+        appointmentRepository.save(newScheduledAppointment);
+        appointmentRepository.save(oldScheduledAppointment);
+
     }
 }
 

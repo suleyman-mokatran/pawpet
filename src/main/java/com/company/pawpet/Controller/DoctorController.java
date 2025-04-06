@@ -11,6 +11,7 @@ import com.company.pawpet.Service.AppUserService;
 import com.company.pawpet.Service.AppointmentService;
 import com.company.pawpet.Service.DoctorService;
 import com.company.pawpet.Service.PetService;
+import com.company.pawpet.notification.NotificationHandler;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,7 +24,10 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 
@@ -32,6 +36,12 @@ import java.util.Optional;
 @PreAuthorize("hasRole('DOCTOR')")
 @CrossOrigin(origins = "http://localhost:3000")
 public class DoctorController {
+
+    private final NotificationHandler notificationHandler;
+
+    public DoctorController(NotificationHandler notificationHandler) {
+        this.notificationHandler = notificationHandler;
+    }
 
     @Autowired
     DoctorService doctorService;
@@ -151,6 +161,60 @@ public class DoctorController {
     public ResponseEntity<Pet> getPetById(@PathVariable int id){
         Pet pet = petService.getPetById(id).orElseThrow();
         return ResponseEntity.ok(pet);
+    }
+
+    @PutMapping("/rescheduleappointment/{oldId}/{newId}/{userId}")
+    public ResponseEntity<String> rescheduleAppointment(@PathVariable int oldId,
+                                                        @PathVariable int newId,
+                                                        @PathVariable int userId) {
+        try {
+            appointmentService.rescheduleBookedAppointment(oldId, newId);
+
+            notificationHandler.sendNotificationToUser(userId, "Your appointment has rescheduled!");
+
+
+            return ResponseEntity.ok("Appointment rescheduled successfully!");
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Appointment not found!");
+        }
+        catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error sending notification: " + e.getMessage());
+        }
+        catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error rescheduling appointment: " + e.getMessage());
+        }
+    }
+
+    @PutMapping("/updatepet/{id}/{appointmentId}")
+    public ResponseEntity<Pet> updateDietaryPreferencesForPet(
+            @PathVariable int id,
+            @PathVariable int appointmentId,
+            @RequestBody Map<String, Object> data) {
+
+        Appointment appointment = appointmentService.getAppointment(appointmentId);
+        appointment.setStatus("done");
+        appointmentService.updateAppointment(appointmentId,appointment);
+        Pet pet = petService.getPetById(id).orElseThrow();
+
+        pet.setLastVetVisit(appointment.getSelectedDate());
+
+        if (data.containsKey("dietaryPreferences")) {
+            List<String> dietaryPreferences = (List<String>) data.get("dietaryPreferences");
+            pet.setDietaryPreferences(dietaryPreferences);
+        }
+
+        int categoryId = pet.getPetCategory().getCategoryId();
+
+        return ResponseEntity.ok(petService.updatePet(id, categoryId, pet));
+    }
+
+    @PutMapping("/updatemissedappointment/{id}")
+    public ResponseEntity<Appointment> updateMissedAppointment(@PathVariable int id){
+        Appointment appointment = appointmentService.getAppointment(id);
+        appointment.setStatus("missed");
+        return ResponseEntity.ok(appointmentService.updateAppointment(id,appointment));
     }
 
 }

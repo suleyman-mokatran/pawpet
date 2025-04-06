@@ -1,5 +1,6 @@
 package com.company.pawpet.Model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,6 +17,8 @@ public class Order {
     String  Status;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    @JsonIgnore
+
     private List<OrderItem> orderItemList;
 
     @OneToOne(cascade = CascadeType.ALL)

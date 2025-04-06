@@ -1,6 +1,7 @@
 package com.company.pawpet.Model;
 
 import com.company.pawpet.Enum.Role;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
@@ -59,26 +60,33 @@ public class AppUser implements UserDetails {
     }
 
     @OneToMany(mappedBy = "appUser", cascade = CascadeType.ALL)
-    @JsonManagedReference
+    @JsonIgnore
     private List<Appointment> appointmentList;
 
     @ElementCollection
-    @JsonManagedReference
+    @JsonIgnore
     @OneToMany(mappedBy = "appUser", cascade = CascadeType.ALL)
     private List<Pet> petList;
 
 
     @OneToMany(mappedBy = "appUser", cascade = CascadeType.ALL)
+    @JsonIgnore
+
     private List<Pet> AdoptedPets;
 
     @OneToMany(mappedBy = "appUser", cascade = CascadeType.ALL)
+    @JsonIgnore
+
     private List<Order> orderList;
 
     @OneToMany(mappedBy = "appUser", cascade = CascadeType.ALL)
+    @JsonIgnore
+
     private List<Review> reviewList;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "CartId", referencedColumnName = "CartId")
+
     private Cart cart;
 
     public AppUser(String firstname, String lastname, byte[] image, LocalDate birthDate, String gender, String username, int phone, Role role, String address, String password) {

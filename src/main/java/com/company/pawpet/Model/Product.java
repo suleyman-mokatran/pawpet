@@ -1,5 +1,8 @@
 package com.company.pawpet.Model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -18,6 +21,8 @@ public class Product {
     private String Description;
     private float Price;
     private int Stock;
+    @Lob
+    private byte[] image;
 
     public Product() {
     }
@@ -60,6 +65,14 @@ public class Product {
             inverseJoinColumns = @JoinColumn(name = "OrderItemId")
     )
     private List<OrderItem> orderItemList;
+
+    public byte[] getImage() {
+        return image;
+    }
+
+    public void setImage(byte[] image) {
+        this.image = image;
+    }
 
     public ProductProvider getProductProvider() {
         return ProductProvider;

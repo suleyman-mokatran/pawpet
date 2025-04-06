@@ -19,6 +19,7 @@ public class Appointment {
     float price;
     long duration;
     boolean booked = false;
+    String status;
 
     @JsonFormat(pattern = "yyyy-MM-dd")
    private LocalDate selectedDate;
@@ -34,7 +35,6 @@ public class Appointment {
 
     @ManyToOne
     @JoinColumn(name = "AppUserId")
-    @JsonBackReference
     private AppUser appUser;
 
     @ManyToOne
@@ -62,6 +62,14 @@ public class Appointment {
             return Duration.between(startRange, endRange).toMinutes();
         }else{
             return 0;}
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public Pet getPet() {

@@ -146,16 +146,12 @@ public class AdminController {
         return ResponseEntity.ok(savedCategory);
     }
 
-
     @PostMapping("/addproductcategory")
-    public ResponseEntity<?> addNewProductCategory(@Valid @RequestBody Category category,
-                                                   @RequestParam String categoryName, BindingResult result) {
+    public ResponseEntity<?> addNewProductCategory( @RequestBody @Valid Category category, BindingResult result) {
         if (result.hasErrors()) {
             return ResponseEntity.badRequest().body(result.getAllErrors());
         }
-
-        // Setting the name manually and type to PRODUCT
-        Category savedCategory = categoryService.addNewProductCategory(category, categoryName);
+        Category savedCategory = categoryService.addNewProductCategory(category);
         return ResponseEntity.ok(savedCategory);
     }
 
@@ -170,12 +166,15 @@ public class AdminController {
         return categoryService.findPetCategory();
     }
 
+    @GetMapping("/getproductcategories")
+    public List<Map<String,String>> findProductCategories(){
+        return categoryService.findProductCategory();
+    }
 
     @PutMapping("/updatecategory/{id}")
     public ResponseEntity<Category> updateCategory(@PathVariable int id,@RequestBody Category category) {
         return ResponseEntity.ok(categoryService.updateCategory(id,category));
     }
-
 
     @DeleteMapping("/deletecategory/{id}")
     public void deleteCategory(@PathVariable int id){
@@ -193,6 +192,7 @@ public class AdminController {
         AppUser savedUser = appUserService.addNewUser(user);
         return ResponseEntity.ok(savedUser);
     }
+
     @PutMapping("/updateuser/{id}")
     public ResponseEntity<?> updateUser(@PathVariable int id,@Valid @RequestBody AppUser user, BindingResult result){
         if (result.hasErrors()) {
@@ -202,11 +202,13 @@ public class AdminController {
         return ResponseEntity.ok(savedUser);
     }
     @GetMapping("/getuser/{id}")
+
     public ResponseEntity<AppUser> getUserById(@PathVariable int id) {
         return appUserService.getUserById(id)
                 .map(ResponseEntity::ok)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
     }
+
     @DeleteMapping("/deleteuser/{id}")
     public void deleteUser(@PathVariable int id ){
         appUserService.deleteUser(id);
@@ -228,6 +230,7 @@ public class AdminController {
         ServiceProvider savedsp = serviceProviderService.addNewSP(sp);
         return ResponseEntity.ok(savedsp);
     }
+
     @PutMapping("/updatesp/{id}")
     public ResponseEntity<?> updateSP(@PathVariable int id,@Valid @RequestBody ServiceProvider sp, BindingResult result){
         if (result.hasErrors()) {
@@ -246,6 +249,7 @@ public class AdminController {
     public List<ServiceProvider> getAllSP() {
         return serviceProviderService.getAllServiceProviders();
     }
+
     @GetMapping("/getsp/{id}")
     public ResponseEntity<ServiceProvider> getSpById(@PathVariable int ServiceProviderId) {
         return serviceProviderService.getServiceProviderById(ServiceProviderId)
@@ -264,19 +268,12 @@ public class AdminController {
         ProductProvider savedpp = productProviderService.addNewPP(pp);
         return ResponseEntity.ok(savedpp);
     }
+
     @GetMapping("/getpp/{id}")
     public ResponseEntity<ProductProvider> getPPById(@PathVariable int PPid) {
         return productProviderService.getPPById(PPid)
                 .map(ResponseEntity::ok)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "PP not found"));
-    }
-    @PutMapping("/updatepp/{id}")
-    public ResponseEntity<?> updatePP(@PathVariable int id,@Valid @RequestBody ProductProvider pp, BindingResult result){
-        if (result.hasErrors()) {
-            return ResponseEntity.badRequest().body(result.getAllErrors());
-        }
-        ProductProvider savedpp = productProviderService.updateProductProvider(id,pp);
-        return ResponseEntity.ok(savedpp);
     }
 
     @DeleteMapping("/deletepp/{id}")
@@ -293,27 +290,22 @@ public class AdminController {
     CompanyService companyService;
 
     @PostMapping("/addcompany")
-    public ResponseEntity<?> addNewCompany(@Valid @RequestBody Company company ,BindingResult result){
-        if (result.hasErrors()) {
-            return ResponseEntity.badRequest().body(result.getAllErrors());
-        }
+    public ResponseEntity<Company> addNewCompany(@Valid @RequestBody Company company ){
         Company savedCompany = companyService.addNewCompany(company);
         return ResponseEntity.ok(savedCompany);
     }
 
     @PutMapping("/updatecompany/{id}")
-    public ResponseEntity<?> updateCompany(@PathVariable int id,@Valid @RequestBody Company company, BindingResult result){
-        if (result.hasErrors()) {
-            return ResponseEntity.badRequest().body(result.getAllErrors());
-        }
+    public ResponseEntity<Company> updateCompany(@PathVariable int id,@Valid @RequestBody Company company){
+
         Company savedCompany = companyService.updateCompany(id,company);
         return ResponseEntity.ok(savedCompany);
     }
+
     @GetMapping("/getcompany/{id}")
     public ResponseEntity<Company> getCompanyById(@PathVariable int id) {
-        return companyService.getCompanyById(id)
-                .map(ResponseEntity::ok)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Company not found"));
+        Company company = companyService.getCompanyById(id).orElseThrow();
+        return ResponseEntity.ok(company);
     }
     @DeleteMapping("/deletecompany/{id}")
     public void deleteCompany(@PathVariable int id ){

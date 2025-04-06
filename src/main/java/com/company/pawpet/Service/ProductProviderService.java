@@ -1,6 +1,7 @@
 package com.company.pawpet.Service;
 
 import com.company.pawpet.Enum.Role;
+import com.company.pawpet.Model.Company;
 import com.company.pawpet.Model.ProductProvider;
 import com.company.pawpet.Repository.ProductProviderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,9 @@ public class ProductProviderService {
 
     @Autowired
     ProductProviderRepository productProviderRepository;
+
+    @Autowired
+    CompanyService companyService;
 
     final BCryptPasswordEncoder passwordEncoder;
 
@@ -50,22 +54,19 @@ public class ProductProviderService {
         return productProviderRepository.findProductProviderByCompany(companyId);
     }
 
-    public ProductProvider updateProductProvider(int ppId, ProductProvider pp) {
-        Optional<ProductProvider> existingPp = productProviderRepository.findById(ppId);
+    public ProductProvider updateProductProvider(int ppId, int companyId,ProductProvider pp) {
+        ProductProvider existingPp = productProviderRepository.findById(ppId).orElseThrow();
+        Company company = companyService.getCompanyById(companyId).orElseThrow();
 
-        if (existingPp.isEmpty()) {
-            throw new RuntimeException("PP with ID " + ppId + " not found.");
-        }
-
-        ProductProvider PPToUpdate = existingPp.get();
+        ProductProvider PPToUpdate = existingPp;
 
         PPToUpdate.setFirstname(pp.getFirstname());
         PPToUpdate.setLastname(pp.getLastname());
         PPToUpdate.setBirthDate(pp.getBirthDate());
         PPToUpdate.setGender(pp.getGender());
-        PPToUpdate.setUsername(pp.getUsername());
         PPToUpdate.setPhone(pp.getPhone());
         PPToUpdate.setAddress(pp.getAddress());
+        PPToUpdate.setCompany(company);
 
         return productProviderRepository.save(PPToUpdate);
     }
@@ -80,4 +81,6 @@ public class ProductProviderService {
     public ProductProvider findByUsername(String username) {
         return productProviderRepository.findByUsername(username);
     }
+
+
 }

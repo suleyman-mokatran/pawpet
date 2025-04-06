@@ -33,6 +33,7 @@ public class Category {
     private List<Pet> petList;
 
     @OneToMany(mappedBy = "ProductCategory", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Product> productList;
 
     public Map<String, String> getMSCategory() {

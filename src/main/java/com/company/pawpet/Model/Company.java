@@ -1,5 +1,8 @@
 package com.company.pawpet.Model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 import java.util.List;
@@ -15,12 +18,14 @@ public class Company {
     String CompanyAddress;
 
     @OneToMany(mappedBy = "Company", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Product> productList;
 
     @OneToOne(mappedBy = "company")
     private ServiceProvider serviceProvider;
 
     @OneToOne(mappedBy = "company")
+    @JsonIgnore
     private ProductProvider productProvider;
 
     public int getCompanyId() {

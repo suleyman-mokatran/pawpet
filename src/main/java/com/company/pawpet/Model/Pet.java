@@ -54,7 +54,6 @@ public class Pet {
 
     @ManyToOne
     @JoinColumn(name = "petUserId")
-    @JsonBackReference
     @JsonProperty("petUserId")
     private AppUser appUser;
 
