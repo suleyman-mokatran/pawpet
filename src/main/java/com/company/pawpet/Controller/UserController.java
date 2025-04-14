@@ -1,11 +1,12 @@
 package com.company.pawpet.Controller;
 
 import com.company.pawpet.Model.*;
+import com.company.pawpet.PaymentRequest;
+import com.company.pawpet.Repository.CartRepository;
 import com.company.pawpet.notification.NotificationHandler;
 import com.company.pawpet.PasswordUpdateRequest;
 import com.company.pawpet.Repository.UserRepository;
 import com.company.pawpet.Service.*;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -30,7 +31,6 @@ public class UserController {
 
     private final NotificationHandler notificationHandler;
 
-    // ✅ Inject NotificationHandler using Constructor
     public UserController(NotificationHandler notificationHandler) {
         this.notificationHandler = notificationHandler;
     }
@@ -48,6 +48,9 @@ public class UserController {
     DoctorService doctorService;
 
     @Autowired
+    ProductService productService;
+
+    @Autowired
     private BCryptPasswordEncoder passwordEncoder;
 
    @Autowired
@@ -55,6 +58,21 @@ public class UserController {
 
    @Autowired
     AppointmentService appointmentService;
+
+   @Autowired
+   CartService cartService;
+
+   @Autowired
+   CartItemService cartItemService;
+
+   @Autowired
+   OrderService orderService;
+
+   @Autowired
+   OrderItemService orderItemService;
+
+   @Autowired
+    CartRepository cartRepository;
 
     @GetMapping("/profile")
     public ResponseEntity<AppUser> getUserProfile(@AuthenticationPrincipal UserDetails userDetails) {
@@ -241,6 +259,157 @@ public class UserController {
                     .body("Error rescheduling appointment: " + e.getMessage());
         }
     }
+
+    @GetMapping("/getproducts")
+    public ResponseEntity<List<Product>> getAllProducts(){
+        return ResponseEntity.ok(productService.getAllProducts());
+    }
+
+    @GetMapping("/getproduct/{id}")
+    public ResponseEntity<Product> getProductById(@PathVariable int id){
+        return ResponseEntity.ok(productService.getProductById(id).orElseThrow());
+    }
+
+    @PostMapping("/addtocart/{userId}/{productId}")
+    public ResponseEntity<Cart> addToCart(@PathVariable int userId,@PathVariable int productId, @RequestBody CartItem cartItem) {
+        int cartId;
+        AppUser appUser = appUserService.getUserById(userId).orElseThrow();
+        if(appUser.getCart() == null){
+        Cart userCart = cartService.saveCart(userId);
+            cartId = userCart.getCartId();
+            CartItem savedItem = cartItemService.saveCartItem(cartId,productId, cartItem);
+            userCart.getCartItemList().add(savedItem);
+            Cart updatedCart = cartService.updateCart(cartId, userCart);
+            return ResponseEntity.ok(updatedCart);
+        }
+        else{
+            int existingCardId = appUser.getCart().getCartId();
+            Cart existCart = cartService.getCartById(existingCardId).orElseThrow();
+            for(CartItem ci : existCart.getCartItemList()){
+                if(ci.getProduct().getProductId() == productId
+                        && ci.getColor().equals(cartItem.getColor())
+                        && ci.getSize().equals(cartItem.getSize())){
+                    int sum = ci.getQuantity()+cartItem.getQuantity();
+                    int cartItemId = ci.getCartItemId();
+                   CartItem existCartItem =  cartItemService.updateCartItem(cartItemId,sum);
+                    existCart.getCartItemList().add(existCartItem);
+                    Cart updatedCart = cartService.updateCart(existingCardId, existCart);
+                    return ResponseEntity.ok(updatedCart);
+                }
+            }
+            CartItem savedItem = cartItemService.saveCartItem(existingCardId,productId, cartItem);
+            existCart.getCartItemList().add(savedItem);
+            Cart updatedCart = cartService.updateCart(existingCardId, existCart);
+            return ResponseEntity.ok(updatedCart);
+        }
+    }
+
+
+    @GetMapping("/getnumberofcartitems/{userId}")
+    public ResponseEntity<Integer> getNumberOfCartItems(@PathVariable int userId) {
+        AppUser appUser = userRepository.findById(userId).orElseThrow();
+
+        Cart cart = appUser.getCart();
+        if (cart == null) {
+            return ResponseEntity.ok(0);
+        }
+
+        List<CartItem> items = cart.getCartItemList();
+
+        return ResponseEntity.ok(items.size());
+    }
+
+    @GetMapping("/getcart/{id}")
+    public ResponseEntity<List<CartItem>> getCart(@PathVariable int id){
+        AppUser appUser = userRepository.findById(id).orElseThrow();
+        Cart cart = appUser.getCart();
+        List<CartItem> items = cart.getCartItemList();
+        return ResponseEntity.ok(items);
+    }
+
+    @PutMapping("/incrementitem/{cartItemId}")
+    public void incrementItem(@PathVariable int cartItemId) {
+        CartItem cartItem = cartItemService.getCartItemById(cartItemId).orElseThrow();
+
+        int plus = cartItem.getQuantity() + 1;
+        cartItemService.updateCartItem(cartItemId, plus);
+       Cart cart = cartItem.getCart();
+       Cart newCart = cartService.updateCart(cart.getCartId(),cart);
+    }
+
+    @PutMapping("/decrementitem/{cartItemId}")
+    public void decrementItem(@PathVariable int cartItemId) {
+        CartItem cartItem = cartItemService.getCartItemById(cartItemId).orElseThrow();
+        CartItem extend = cartItem;
+        int quantity = cartItem.getQuantity();
+        if (quantity == 1) {
+            cartItemService.deleteCartItem(cartItemId);
+            Cart cart = extend.getCart();
+            Cart newCart = cartService.updateCart(cart.getCartId(),cart);
+        } else {
+            int minus = cartItem.getQuantity() - 1;
+            cartItemService.updateCartItem(cartItemId, minus);
+            Cart cart = cartItem.getCart();
+            Cart newCart = cartService.updateCart(cart.getCartId(),cart);
+        }
+    }
+
+    @PostMapping("/pay/{userid}")
+    public ResponseEntity<Map<String, String>> makeFakePayment(@PathVariable int userid,@RequestBody PaymentRequest request) {
+        if ("4242424242424242".equals(request.getCardNumber())) {
+            int orderId;
+            AppUser appUser = appUserService.getUserById(userid).orElseThrow();
+            Cart cart = appUser.getCart();
+            List<Integer> cartItems = request.getCartItems();
+                Order userOrder = orderService.saveOrder(userid);
+                orderId = userOrder.getOrderId();
+                for(int item : cartItems){
+                    CartItem cartItem = cartItemService.getCartItemById(item).orElseThrow();
+                    OrderItem orderItem = new OrderItem();
+                    orderItem.setPrice(cartItem.getPrice());
+                    orderItem.setQuantity(cartItem.getQuantity());
+                    OrderItem savedItem = orderItemService.saveOrderItem(orderId,cartItem.getProduct().getProductId(), orderItem);
+                    Product product = savedItem.getProduct();
+                    String colorAndSize = cartItem.getColor() + '-' + cartItem.getSize();
+                    int productQuantity = product.getStockByColorAndSize().get(colorAndSize);
+                    Map<String, Integer> stockMap = product.getStockByColorAndSize();
+                    stockMap.put(colorAndSize,productQuantity - cartItem.getQuantity());
+                    product.setStockByColorAndSize(stockMap);
+                    productService.updateProduct(product.getProductCategory().getCategoryId(),product.getProductId(),product);
+                    userOrder.getOrderItemList().add(savedItem);
+                    cartItem.setCart(null);
+                    cart.getCartItemList().remove(cartItem);
+                    cartItemService.deleteCartItem(item);
+
+                }
+                Order updatedOrder = orderService.updateOrder(orderId,userOrder);
+            if(cart.getCartItemList() == null || cart.getCartItemList().isEmpty()) {
+                appUser.setCart(null);
+                userRepository.save(appUser);
+            }
+            return ResponseEntity.ok(Map.of(
+                    "status", "success",
+                    "message", "Payment accepted"
+            ));
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+                    "status", "failed",
+                    "message", "Invalid card number"
+            ));
+        }
+    }
+
+
+
+
+
+
+        @GetMapping("/getstock/{productId}")
+        public ResponseEntity<Integer> getProductStock(@PathVariable int productId){
+        return ResponseEntity.ok(productService.getOverALlStock(productId));
+        }
+
+
 
 
 }

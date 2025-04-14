@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Map;
 
 @Entity
 @Table(name = "products")
@@ -19,20 +20,25 @@ public class Product {
 
     private String ProductName;  // Corrected field naming
     private String Description;
-    private float Price;
-    private int Stock;
+
     @Lob
     private byte[] image;
+
+   @ElementCollection
+    Map<String,Integer> stockByColorAndSize;
+
+   @ElementCollection
+   Map<String, Double> priceByColorAndSize;
 
     public Product() {
     }
 
-    public Product(int productId, String productName, String description, float price, int stock) {
+    public Product(int productId, String productName, String description, Map<String,Double> priceByColorAndSize,Map<String,Integer> stockByColorAndSize) {
         this.productId = productId;
         ProductName = productName;
         Description = description;
-        Price = price;
-        Stock = stock;
+        this.priceByColorAndSize = priceByColorAndSize;
+        this.stockByColorAndSize = stockByColorAndSize;
     }
 
     @ManyToOne
@@ -48,23 +54,18 @@ public class Product {
 
     @ManyToOne
     @JoinColumn(name = "Company")
-    private Company Company;  // Corrected field naming
+    private Company Company;
 
-    @ManyToMany
-    @JoinTable(
-            name = "CartItem_Product",
-            joinColumns = @JoinColumn(name = "ProductId"),
-            inverseJoinColumns = @JoinColumn(name = "CartItemId")
-    )
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<CartItem> cartItemList;
 
-    @ManyToMany
-    @JoinTable(
-            name = "OrderItem_Product",
-            joinColumns = @JoinColumn(name = "ProductId"),
-            inverseJoinColumns = @JoinColumn(name = "OrderItemId")
-    )
+
+    @OneToMany(mappedBy = "product")
+    @JsonIgnore
     private List<OrderItem> orderItemList;
+
+
 
     public byte[] getImage() {
         return image;
@@ -110,15 +111,6 @@ public class Product {
         return Description;
     }
 
-    public float getPrice() {
-        return Price;
-    }
-
-
-    public int getStock() {
-        return Stock;
-    }
-
     public void setProductProvider(ProductProvider productProvider) {
         this.ProductProvider = productProvider;
     }
@@ -155,13 +147,19 @@ public class Product {
         this.Description = description;
     }
 
-    public void setPrice(float price) {
-        this.Price = price;
+    public Map<String, Double> getPriceByColorAndSize() {
+        return priceByColorAndSize;
     }
 
-    public void setStock(int stock) {
-        this.Stock = stock;
+    public void setPriceByColorAndSize(Map<String, Double> priceByColorAndSize) {
+        this.priceByColorAndSize = priceByColorAndSize;
     }
 
+    public Map<String, Integer> getStockByColorAndSize() {
+        return stockByColorAndSize;
+    }
 
+    public void setStockByColorAndSize(Map<String, Integer> stockByColorAndSize) {
+        this.stockByColorAndSize = stockByColorAndSize;
+    }
 }

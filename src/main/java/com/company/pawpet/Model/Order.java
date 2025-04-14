@@ -4,7 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -14,16 +16,14 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     int OrderId;
     float TotalPrice;
-    String  Status;
+
+    @CreationTimestamp
+    @Column(updatable = false)
+    LocalDateTime CreatedAt;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     @JsonIgnore
-
     private List<OrderItem> orderItemList;
-
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "CartId", referencedColumnName = "CartId")
-    private Cart cart;
 
     @ManyToOne
     @JoinColumn(name = "AppUserId")
@@ -45,14 +45,6 @@ public class Order {
         TotalPrice = totalPrice;
     }
 
-    public String getStatus() {
-        return Status;
-    }
-
-    public void setStatus(String status) {
-        Status = status;
-    }
-
     public List<OrderItem> getOrderItemList() {
         return orderItemList;
     }
@@ -61,19 +53,19 @@ public class Order {
         this.orderItemList = orderItemList;
     }
 
-    public Cart getCart() {
-        return cart;
-    }
-
-    public void setCart(Cart cart) {
-        this.cart = cart;
-    }
-
     public AppUser getAppUser() {
         return appUser;
     }
 
     public void setAppUser(AppUser appUser) {
         this.appUser = appUser;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return CreatedAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        CreatedAt = createdAt;
     }
 }

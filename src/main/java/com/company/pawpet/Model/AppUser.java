@@ -71,22 +71,17 @@ public class AppUser implements UserDetails {
 
     @OneToMany(mappedBy = "appUser", cascade = CascadeType.ALL)
     @JsonIgnore
-
     private List<Pet> AdoptedPets;
 
     @OneToMany(mappedBy = "appUser", cascade = CascadeType.ALL)
     @JsonIgnore
-
     private List<Order> orderList;
 
     @OneToMany(mappedBy = "appUser", cascade = CascadeType.ALL)
     @JsonIgnore
-
     private List<Review> reviewList;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "CartId", referencedColumnName = "CartId")
-
+    @OneToOne(mappedBy = "appUser", cascade = CascadeType.ALL, orphanRemoval = true)
     private Cart cart;
 
     public AppUser(String firstname, String lastname, byte[] image, LocalDate birthDate, String gender, String username, int phone, Role role, String address, String password) {

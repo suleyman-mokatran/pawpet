@@ -15,12 +15,21 @@ public class OrderItem {
     int quantity;
     Float price;
 
-    @ManyToMany(mappedBy = "orderItemList")
-    private List<Product> productList ;
+    @ManyToOne
+    @JoinColumn(name = "product_id") // Foreign key to the Product table
+    private Product product;
 
     @ManyToOne
     @JoinColumn(name = "OrderId")
     private Order order;
+
+    public Product getProduct() {
+        return product;
+    }
+
+    public void setProduct(Product product) {
+        this.product = product;
+    }
 
     public int getOrderItemsId() {
         return OrderItemsId;
@@ -44,14 +53,6 @@ public class OrderItem {
 
     public void setPrice(Float price) {
         this.price = price;
-    }
-
-    public List<Product> getProductList() {
-        return productList;
-    }
-
-    public void setProductList(List<Product> productList) {
-        this.productList = productList;
     }
 
     public Order getOrder() {

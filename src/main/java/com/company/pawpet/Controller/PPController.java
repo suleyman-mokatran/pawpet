@@ -13,12 +13,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.parameters.P;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Map;
@@ -100,12 +98,12 @@ public class PPController {
 
     @GetMapping("/getproducts/{id}")
     public ResponseEntity<List<Product>> getAllProducts(@PathVariable int id){
-        return ResponseEntity.ok(productService.getAllProducts(id));
+        return ResponseEntity.ok(productService.getAllProductsByPP(id));
     }
 
-    @PostMapping("/addproduct/{categoryId}/{ppId}/{companyId}")
-    public ResponseEntity<Product> addNewProduct(@PathVariable int categoryId, @PathVariable int ppId , @PathVariable int companyId, @RequestBody Product product){
-        return ResponseEntity.ok(productService.saveProduct(categoryId,ppId,companyId,product));
+    @PostMapping("/addproduct/{categoryId}/{ppId}")
+    public ResponseEntity<Product> addNewProduct(@PathVariable int categoryId, @PathVariable int ppId , @RequestBody Product product){
+        return ResponseEntity.ok(productService.saveProduct(categoryId,ppId,product));
     }
 
     @GetMapping("/getproductcategories")
@@ -118,9 +116,9 @@ public class PPController {
          productService.deleteProduct(id);
     }
 
-    @PutMapping("/updateproduct/{categoryId}/{productId}/{companyId}")
-    public ResponseEntity<Product> updateProduct(@PathVariable int categoryId,@PathVariable int productId,@PathVariable int companyId, @RequestBody Product product){
-        return ResponseEntity.ok(productService.updateProduct(categoryId,productId,companyId,product));
+    @PutMapping("/updateproduct/{categoryId}/{productId}")
+    public ResponseEntity<Product> updateProduct(@PathVariable int categoryId,@PathVariable int productId, @RequestBody Product product){
+        return ResponseEntity.ok(productService.updateProduct(categoryId,productId,product));
     }
 
     @GetMapping("/getproduct/{id}")
