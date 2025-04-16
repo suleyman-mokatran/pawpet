@@ -13,7 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.parameters.P;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.validation.BindingResult;
@@ -355,9 +354,10 @@ public class UserController {
     }
 
     @PostMapping("/pay/{userid}")
-    public ResponseEntity<Map<String, String>> makeFakePayment(@PathVariable int userid,@RequestBody PaymentRequest request) {
+    public ResponseEntity<Map<String, String>> makeFakePayment(@PathVariable int userid,@RequestBody PaymentRequest request) throws IOException {
         if ("4242424242424242".equals(request.getCardNumber())) {
             int orderId;
+            List<Integer> ppIds = new ArrayList<>();
             AppUser appUser = appUserService.getUserById(userid).orElseThrow();
             Cart cart = appUser.getCart();
             List<Integer> cartItems = request.getCartItems();
@@ -370,6 +370,18 @@ public class UserController {
                     orderItem.setQuantity(cartItem.getQuantity());
                     OrderItem savedItem = orderItemService.saveOrderItem(orderId,cartItem.getProduct().getProductId(), orderItem);
                     Product product = savedItem.getProduct();
+                    int newPP = product.getProductProvider().getAppUserId();
+                   if(ppIds.isEmpty()){
+                       ppIds.add(newPP);
+                       notificationHandler.sendNotificationToPP(newPP, "New Order!");
+                   }
+                   else{
+                       if(!ppIds.contains(newPP)){
+                           ppIds.add(newPP);
+                           notificationHandler.sendNotificationToPP(newPP, "New Order!");
+                       }
+                   }
+
                     String colorAndSize = cartItem.getColor() + '-' + cartItem.getSize();
                     int productQuantity = product.getStockByColorAndSize().get(colorAndSize);
                     Map<String, Integer> stockMap = product.getStockByColorAndSize();
@@ -380,13 +392,13 @@ public class UserController {
                     cartItem.setCart(null);
                     cart.getCartItemList().remove(cartItem);
                     cartItemService.deleteCartItem(item);
-
                 }
                 Order updatedOrder = orderService.updateOrder(orderId,userOrder);
             if(cart.getCartItemList() == null || cart.getCartItemList().isEmpty()) {
                 appUser.setCart(null);
                 userRepository.save(appUser);
             }
+
             return ResponseEntity.ok(Map.of(
                     "status", "success",
                     "message", "Payment accepted"
@@ -399,15 +411,20 @@ public class UserController {
         }
     }
 
-
-
-
-
-
         @GetMapping("/getstock/{productId}")
         public ResponseEntity<Integer> getProductStock(@PathVariable int productId){
         return ResponseEntity.ok(productService.getOverALlStock(productId));
         }
+
+        @GetMapping("/order/{userid}")
+        public ResponseEntity<List<Order>> getOrdersByUser(@PathVariable int userid){
+        return ResponseEntity.ok(orderService.getUserOrders(userid));
+        }
+
+    @GetMapping("/getorderitems/{orderId}")
+    public ResponseEntity<List<OrderItem>> getOrderItems(@PathVariable int orderId){
+        return ResponseEntity.ok(orderItemService.getOrderItems(orderId));
+    }
 
 
 

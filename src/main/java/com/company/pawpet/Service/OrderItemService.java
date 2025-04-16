@@ -45,4 +45,28 @@ public class OrderItemService {
     public void deleteOrderItem(int id) {
         orderItemRepository.deleteById(id);
     }
+
+    public List<OrderItem> getOrder(int ppId){
+        return orderItemRepository.findOrderItemsByProductProvider(ppId);
+    }
+    public List<OrderItem> getOrderItems(int orderId){
+        return orderItemRepository.findOrderItemsByOrder(orderId);
+    }
+
+    public void markItemAsDone(int orderItem){
+        OrderItem updatedItem = orderItemRepository.findById(orderItem).orElseThrow();
+        updatedItem.setDone(true);
+        orderItemRepository.save(updatedItem);
+        int orderId = updatedItem.getOrder().getOrderId();
+        orderService.markOrder(orderId);
+    }
+
+    public void markItemAsUnDone(int orderItem){
+        OrderItem updatedItem = orderItemRepository.findById(orderItem).orElseThrow();
+        updatedItem.setDone(false);
+        orderItemRepository.save(updatedItem);
+        int orderId = updatedItem.getOrder().getOrderId();
+        orderService.markOrder(orderId);
+    }
+
 }

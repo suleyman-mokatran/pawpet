@@ -2,7 +2,9 @@ package com.company.pawpet.Service;
 
 import com.company.pawpet.Model.*;
 import com.company.pawpet.Repository.OrderRepository;
+import com.company.pawpet.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -18,6 +20,9 @@ public class OrderService {
 
     @Autowired
     AppUserService appUserService;
+
+    @Autowired
+    UserRepository appUserRepository;
 
     public List<Order> getAllOrders() {
         return orderRepository.findAll();
@@ -50,5 +55,24 @@ public class OrderService {
 
     public void deleteOrder(int id) {
         orderRepository.deleteById(id);
+    }
+
+    public void markOrder(int orderId) {
+        Order updatedOrder = orderRepository.findById(orderId).orElseThrow();
+        List<OrderItem> orderItems = updatedOrder.getOrderItemList();
+
+        boolean allItemsDone = true;
+        for (OrderItem o : orderItems) {
+            if (!o.isDone()) {
+                allItemsDone = false;
+                break;
+            }
+        }
+        updatedOrder.setDone(allItemsDone);
+        orderRepository.save(updatedOrder);
+    }
+
+    public List<Order> getUserOrders(int userId){
+        return orderRepository.findOrdersByUserId(userId);
     }
 }

@@ -16,6 +16,7 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     int OrderId;
     float TotalPrice;
+    boolean done=false;
 
     @CreationTimestamp
     @Column(updatable = false)
@@ -28,6 +29,14 @@ public class Order {
     @ManyToOne
     @JoinColumn(name = "AppUserId")
     private AppUser appUser;
+
+    public boolean isDone() {
+        return done;
+    }
+
+    public void setDone(boolean done) {
+        this.done = done;
+    }
 
     public int getOrderId() {
         return OrderId;

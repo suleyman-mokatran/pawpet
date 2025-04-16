@@ -14,6 +14,7 @@ public class OrderItem {
     int OrderItemsId;
     int quantity;
     Float price;
+    boolean done = false;
 
     @ManyToOne
     @JoinColumn(name = "product_id") // Foreign key to the Product table
@@ -22,6 +23,14 @@ public class OrderItem {
     @ManyToOne
     @JoinColumn(name = "OrderId")
     private Order order;
+
+    public boolean isDone() {
+        return done;
+    }
+
+    public void setDone(boolean done) {
+        this.done = done;
+    }
 
     public Product getProduct() {
         return product;

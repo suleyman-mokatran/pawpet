@@ -17,6 +17,9 @@ public class NotificationHandler extends TextWebSocketHandler {
 
     private static final Map<Integer, WebSocketSession> userSessions = new HashMap<>();
 
+    private static final Map<Integer, WebSocketSession> ppSessions = new HashMap<>();
+
+
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) {
@@ -28,8 +31,6 @@ public class NotificationHandler extends TextWebSocketHandler {
                 try {
                     int doctorId = Integer.parseInt(query.split("=")[1]);
                     doctorSessions.put(doctorId, session);
-                    System.out.println("✅ Doctor " + doctorId + " WebSocket session stored!");
-                    System.out.println("Current doctorSessions: " + doctorSessions.keySet());
                 } catch (NumberFormatException e) {
                     System.out.println("❌ Invalid doctorId format in query: " + query);
                 }
@@ -37,12 +38,20 @@ public class NotificationHandler extends TextWebSocketHandler {
                 try {
                     int userId = Integer.parseInt(query.split("=")[1]);
                     userSessions.put(userId, session);
+                } catch (NumberFormatException e) {
+                    System.out.println("❌ Invalid userId format in query: " + query);
+                }
+            }
+            else if (query.startsWith("ppId=")) {
+                try {
+                    int userId = Integer.parseInt(query.split("=")[1]);
+                    ppSessions.put(userId, session);
                     System.out.println("✅ User " + userId + " WebSocket session stored!");
                     System.out.println("Current userSessions: " + userSessions.keySet());
                 } catch (NumberFormatException e) {
                     System.out.println("❌ Invalid userId format in query: " + query);
                 }
-            } else {
+            }else {
                 System.out.println("❌ Neither doctorId nor userId found in query: " + query);
             }
         } else {
@@ -65,7 +74,6 @@ public class NotificationHandler extends TextWebSocketHandler {
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
         doctorSessions.values().remove(session);  // Remove the session when it closes
-        System.out.println("❌ WebSocket closed for doctor. Current doctorSessions: " + doctorSessions.keySet());
     }
 
     public void sendNotificationToDoctor(int doctorId, String message) throws IOException {
@@ -96,6 +104,22 @@ public class NotificationHandler extends TextWebSocketHandler {
             System.out.println("✅ Sent message: " + message);
         } else {
             System.out.println("❌ No active WebSocket session found for userId " + userId);
+            System.out.println("❌ Message NOT stored. Missed notifications are disabled.");
+        }
+    }
+
+    public void sendNotificationToPP(int ppId, String message) throws IOException {
+        System.out.println("sendNotificationToProductProvider CALLED for ppId: " + ppId + " with message: " + message);
+
+        WebSocketSession session = ppSessions.get(ppId);
+        boolean sessionActive = session != null && session.isOpen();
+        System.out.println("Checking session status for pp " + ppId + ": " + sessionActive);
+
+        if (sessionActive) {
+            session.sendMessage(new TextMessage(message));
+            System.out.println("✅ Sent message: " + message);
+        } else {
+            System.out.println("❌ No active WebSocket session found for ppId " + ppId);
             System.out.println("❌ Message NOT stored. Missed notifications are disabled.");
         }
     }
