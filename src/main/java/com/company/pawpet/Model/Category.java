@@ -26,8 +26,6 @@ public class Category {
     public Category() {
     }
 
-
-
     @OneToMany(mappedBy = "PetCategory", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonBackReference  // ✅ Prevents infinite loop
     private List<Pet> petList;
@@ -35,6 +33,18 @@ public class Category {
     @OneToMany(mappedBy = "ProductCategory", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<Product> productList;
+
+    @OneToMany(mappedBy = "serviceCategory", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<ServiceModel> serviceList;
+
+    public List<ServiceModel> getServiceList() {
+        return serviceList;
+    }
+
+    public void setServiceList(List<ServiceModel> serviceList) {
+        this.serviceList = serviceList;
+    }
 
     public Map<String, String> getMSCategory() {
         return MSCategory;

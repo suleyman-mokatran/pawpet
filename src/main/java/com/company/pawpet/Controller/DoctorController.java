@@ -1,6 +1,5 @@
 package com.company.pawpet.Controller;
 
-import com.company.pawpet.Model.AppUser;
 import com.company.pawpet.Model.Appointment;
 import com.company.pawpet.Model.Doctor;
 import com.company.pawpet.Model.Pet;
@@ -28,7 +27,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 
 
 @RestController
@@ -113,7 +111,7 @@ public class DoctorController {
         if (result.hasErrors()) {
             return ResponseEntity.badRequest().body(result.getAllErrors());
         }
-        Appointment newAppointment = appointmentService.addNewAppointment(id,appointment);
+        Appointment newAppointment = appointmentService.addNewDoctorAppointment(id,appointment);
         return ResponseEntity.ok(newAppointment);
     }
 
@@ -131,7 +129,7 @@ public class DoctorController {
 
     @PutMapping("/updateappointment/{id}")
     public ResponseEntity<Appointment> updateAppointment(@PathVariable int id,@RequestBody Appointment appointment){
-        Appointment savedAppointment =  appointmentService.updateAppointment(id,appointment);
+        Appointment savedAppointment =  appointmentService.updateDoctorAppointment(id,appointment);
         return ResponseEntity.ok(savedAppointment);
     }
 
@@ -195,7 +193,7 @@ public class DoctorController {
 
         Appointment appointment = appointmentService.getAppointment(appointmentId);
         appointment.setStatus("done");
-        appointmentService.updateAppointment(appointmentId,appointment);
+        appointmentService.updateDoctorAppointment(appointmentId,appointment);
         Pet pet = petService.getPetById(id).orElseThrow();
 
         pet.setLastVetVisit(appointment.getSelectedDate());
@@ -214,7 +212,7 @@ public class DoctorController {
     public ResponseEntity<Appointment> updateMissedAppointment(@PathVariable int id){
         Appointment appointment = appointmentService.getAppointment(id);
         appointment.setStatus("missed");
-        return ResponseEntity.ok(appointmentService.updateAppointment(id,appointment));
+        return ResponseEntity.ok(appointmentService.updateDoctorAppointment(id,appointment));
     }
 
 }

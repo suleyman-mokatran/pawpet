@@ -71,7 +71,7 @@ public class UserController {
    OrderItemService orderItemService;
 
    @Autowired
-    CartRepository cartRepository;
+    ServiceService serviceService;
 
     @GetMapping("/profile")
     public ResponseEntity<AppUser> getUserProfile(@AuthenticationPrincipal UserDetails userDetails) {
@@ -238,13 +238,10 @@ public class UserController {
     }
 
     @PutMapping("/rescheduleappointment/{oldId}/{newId}/{doctorId}")
-    public ResponseEntity<String> rescheduleAppointment(@PathVariable int oldId,
-                                                        @PathVariable int newId,
-                                                        @PathVariable int doctorId) {
+    public ResponseEntity<String> rescheduleAppointment(@PathVariable int oldId, @PathVariable int newId, @PathVariable int doctorId) {
         try {
             appointmentService.rescheduleBookedAppointment(oldId, newId);
 
-            // Send Notification BEFORE returning response
             notificationHandler.sendNotificationToDoctor(doctorId, "An appointment has rescheduled!");
 
             return ResponseEntity.ok("Appointment rescheduled successfully!");
@@ -426,6 +423,62 @@ public class UserController {
         return ResponseEntity.ok(orderItemService.getOrderItems(orderId));
     }
 
+    @GetMapping("/getallservices")
+    public ResponseEntity<List<ServiceModel>> getAllServices(){
+        return ResponseEntity.ok(serviceService.getAllServices());
+    }
+
+    @GetMapping("/getserviceappointments/{id}")
+    public ResponseEntity<List<Appointment>> getServiceAppointments(@PathVariable int id){
+        List<Appointment> appointmentList = appointmentService.findAppointmentsByService(id);
+        List<Appointment> filteredAppointments = new ArrayList<>();
+
+        for(var appointment : appointmentList){
+            if(!appointment.isBooked()){
+                filteredAppointments.add(appointment);
+            }
+        }
+        return ResponseEntity.ok(filteredAppointments);
+    }
+
+    @PutMapping("/confirmservicebooking/{userId}/{serviceId}/{petId}/{appointmentId}")
+    public ResponseEntity<String> confirmServiceBooking(@PathVariable int userId,@PathVariable int serviceId,@PathVariable int petId,@PathVariable int appointmentId) throws IOException {
+        Appointment appointment =  appointmentService.bookServiceAppointment(userId,serviceId,petId,appointmentId);
+        ServiceModel serviceModel = serviceService.getServiceById(serviceId);
+        int spId = serviceModel.getServiceProvider().getAppUserId();
+        try {
+            notificationHandler.sendNotificationToSP(spId, "New appointment booked!");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return ResponseEntity.ok("Appointment booked successfully!");
+    }
+
+    @GetMapping("/getservice/{id}")
+    public ResponseEntity<ServiceModel> getServiceById(@PathVariable int id){
+        ServiceModel service = serviceService.getServiceById(id);
+        return ResponseEntity.ok(service);
+    }
+
+    @PutMapping("/rescheduleserviceappointment/{oldId}/{newId}/{serviceId}")
+    public ResponseEntity<String> rescheduleServiceAppointment(@PathVariable int oldId, @PathVariable int newId, @PathVariable int serviceId) {
+        try {
+            appointmentService.rescheduleBookedAppointment(oldId, newId);
+            ServiceModel serviceModel = serviceService.getServiceById(serviceId);
+            int spId = serviceModel.getServiceProvider().getAppUserId();
+            notificationHandler.sendNotificationToSP(spId, "An appointment has rescheduled!");
+
+            return ResponseEntity.ok("Appointment rescheduled successfully!");
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Appointment not found!");
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error sending notification: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error rescheduling appointment: " + e.getMessage());
+        }
+    }
 
 
 

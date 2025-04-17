@@ -28,6 +28,8 @@ public class Appointment {
 
     private String endTime;
 
+    private String type;
+
 
     public DayOfWeek getDayOfWeek() {
         return selectedDate.getDayOfWeek();
@@ -152,5 +154,13 @@ public class Appointment {
 
     public void setDoctor(Doctor doctor) {
         this.doctor = doctor;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 }

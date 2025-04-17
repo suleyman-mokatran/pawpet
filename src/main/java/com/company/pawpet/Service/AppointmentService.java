@@ -1,26 +1,12 @@
 package com.company.pawpet.Service;
 
 
-import com.company.pawpet.Model.AppUser;
-import com.company.pawpet.Model.Appointment;
-import com.company.pawpet.Model.Doctor;
-import com.company.pawpet.Model.Pet;
-import com.company.pawpet.Repository.AppointmentRepository;
-import com.company.pawpet.Repository.DoctorRepository;
-import com.company.pawpet.Repository.PetRepository;
-import com.company.pawpet.Repository.UserRepository;
+import com.company.pawpet.Model.*;
+import com.company.pawpet.Repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
-import java.time.DayOfWeek;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 
 @Service
@@ -38,7 +24,13 @@ public class AppointmentService {
     @Autowired
     PetRepository petRepository;
 
-    public Appointment addNewAppointment(int id ,Appointment appointment){
+    @Autowired
+    ServiceProviderRepository serviceProviderRepository;
+
+    @Autowired
+    ServiceRepository serviceRepository;
+
+    public Appointment addNewDoctorAppointment(int id , Appointment appointment){
 
         Appointment savedAppointment = new Appointment();
 
@@ -56,6 +48,25 @@ public class AppointmentService {
         savedAppointment.setStartTime(appointment.getStartTime());
         savedAppointment.setSelectedDate(appointment.getSelectedDate());
         savedAppointment.setStatus(null);
+        savedAppointment.setType("Vet");
+
+        return appointmentRepository.save(savedAppointment);
+    }
+
+    public Appointment addNewServiceAppointment(int id , Appointment appointment){
+
+        Appointment savedAppointment = new Appointment();
+
+        ServiceModel service = serviceRepository.findById(id).orElseThrow();
+
+        savedAppointment.setService(service);
+        savedAppointment.setPrice(appointment.getPrice());
+        savedAppointment.setBooked(appointment.isBooked());
+        savedAppointment.setEndTime(appointment.getEndTime());
+        savedAppointment.setStartTime(appointment.getStartTime());
+        savedAppointment.setSelectedDate(appointment.getSelectedDate());
+        savedAppointment.setStatus(null);
+        savedAppointment.setType("Service");
 
         return appointmentRepository.save(savedAppointment);
     }
@@ -64,7 +75,27 @@ public class AppointmentService {
         return appointmentRepository.findById(appointmentId).orElseThrow();
     }
 
-    public Appointment updateAppointment(int id , Appointment appointment){
+    public Appointment updateDoctorAppointment(int id , Appointment appointment){
+        Optional<Appointment> existingAppointment = appointmentRepository.findById(id);
+
+        if (existingAppointment.isEmpty()) {
+            throw new RuntimeException("Appointment with ID " + id + " not found.");
+        }
+
+        Appointment appointmentToUpdate = existingAppointment.get();
+
+        appointmentToUpdate.setPrice(appointment.getPrice());
+        appointmentToUpdate.setBooked(appointment.isBooked());
+        appointmentToUpdate.setStartTime(appointment.getStartTime());
+        appointmentToUpdate.setEndTime(appointment.getEndTime());
+        appointmentToUpdate.setSelectedDate(appointment.getSelectedDate());
+        appointmentToUpdate.setStatus(appointment.getStatus());
+
+
+        return appointmentRepository.save(appointmentToUpdate);
+    }
+
+    public Appointment updateServiceAppointment(int id , Appointment appointment){
         Optional<Appointment> existingAppointment = appointmentRepository.findById(id);
 
         if (existingAppointment.isEmpty()) {
@@ -95,6 +126,7 @@ public class AppointmentService {
     public List<Appointment> findAppointmentsByDoctor(int doctorId){
         return appointmentRepository.findAppointmentsByDoctor(doctorId);
     }
+
     public List<Appointment> findAppointmentsByService(int serviceId){
         return appointmentRepository.findAppointmentsByService(serviceId);
     }
@@ -118,6 +150,11 @@ public class AppointmentService {
     public String getWorkingTimeByDay(String day,int id){
         return doctorRepository.findByDayAndDoctorId(day,id);
     }
+
+    public String getSPWorkingTimeByDay(String day,int id){
+        return serviceProviderRepository.findByDayAndSpId(day,id);
+    }
+
 
     public Appointment bookAppointment(int userId,int doctorId, int petId, int appointmentId){
         Appointment existingAppointment = appointmentRepository.findById(appointmentId).orElseThrow();
@@ -161,5 +198,21 @@ public class AppointmentService {
         appointmentRepository.save(oldScheduledAppointment);
 
     }
+
+    public Appointment bookServiceAppointment(int userId,int serviceId, int petId, int appointmentId){
+        Appointment existingAppointment = appointmentRepository.findById(appointmentId).orElseThrow();
+        AppUser existingUser = appUserRepository.findById(userId).orElseThrow();
+        ServiceModel existingService = serviceRepository.findById(serviceId).orElseThrow();
+        Pet existingPet = petRepository.findById(petId).orElseThrow();
+
+        Appointment updatedAppointment = existingAppointment;
+        updatedAppointment.setAppUser(existingUser);
+        updatedAppointment.setService(existingService);
+        updatedAppointment.setPet(existingPet);
+        updatedAppointment.setBooked(true);
+
+        return appointmentRepository.save(updatedAppointment);
+    }
+
 }
 

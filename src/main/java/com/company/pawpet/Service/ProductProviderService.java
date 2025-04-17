@@ -64,6 +64,7 @@ public class ProductProviderService {
         PPToUpdate.setLastname(pp.getLastname());
         PPToUpdate.setBirthDate(pp.getBirthDate());
         PPToUpdate.setGender(pp.getGender());
+        PPToUpdate.setImage(pp.getImage());
         PPToUpdate.setPhone(pp.getPhone());
         PPToUpdate.setAddress(pp.getAddress());
         PPToUpdate.setCompany(company);

@@ -22,6 +22,7 @@ public class Company {
     private List<Product> productList;
 
     @OneToOne(mappedBy = "company")
+    @JsonIgnore
     private ServiceProvider serviceProvider;
 
     @OneToOne(mappedBy = "company")

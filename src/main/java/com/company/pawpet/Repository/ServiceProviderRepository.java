@@ -17,4 +17,7 @@ public interface ServiceProviderRepository extends JpaRepository<ServiceProvider
     List<ServiceProvider> findByRole(Role role);
 
     ServiceProvider findByUsername(String username);
+
+    @Query(value = "SELECT available_days FROM service_provider_available_days WHERE available_days_key = :day AND service_provider_app_user_id = :spId", nativeQuery = true)
+    String findByDayAndSpId(@Param("day") String day, @Param("spId") int spId);
 }

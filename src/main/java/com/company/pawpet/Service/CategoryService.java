@@ -33,8 +33,14 @@ public class CategoryService {
         return categoryRepository.save(category);
     }
 
+    public Category addNewServiceCategory(Category category) {
 
+        Category newCategory = new Category();
+        category.setType("SERVICE");
+        newCategory.setMSCategory(category.getMSCategory());
 
+        return categoryRepository.save(category);
+    }
 
     public Category updateCategory(int id, Category category) {
         Optional<Category> existingCategory = categoryRepository.findById(id);
@@ -48,7 +54,6 @@ public class CategoryService {
 
         return categoryRepository.save(categoryToUpdate);
     }
-
 
     public void deleteCategory(int CategoryId){
         categoryRepository.deleteById(CategoryId);
@@ -66,10 +71,12 @@ public class CategoryService {
         return categoryRepository.findAllProductCategories();
     }
 
+    public List<Map<String,String>> findServiceCategory(){
+        return categoryRepository.findAllServiceCategories();
+    }
 
     public Category findById( int CategoryId){
         return categoryRepository.findById(CategoryId).orElseThrow();
     }
-
 
 }

@@ -146,6 +146,15 @@ public class AdminController {
         return ResponseEntity.ok(savedCategory);
     }
 
+    @PostMapping("/addservicecategory")
+    public ResponseEntity<?> addNewServiceCategory( @RequestBody @Valid Category category, BindingResult result) {
+        if (result.hasErrors()) {
+            return ResponseEntity.badRequest().body(result.getAllErrors());
+        }
+        Category savedCategory = categoryService.addNewServiceCategory(category);
+        return ResponseEntity.ok(savedCategory);
+    }
+
     @PostMapping("/addproductcategory")
     public ResponseEntity<?> addNewProductCategory( @RequestBody @Valid Category category, BindingResult result) {
         if (result.hasErrors()) {
@@ -164,6 +173,11 @@ public class AdminController {
     @GetMapping("/getpetcategories")
     public List<Map<String,String>> findPetCategories(){
         return categoryService.findPetCategory();
+    }
+
+    @GetMapping("/getservicecategories")
+    public List<Map<String,String>> findServiceCategories(){
+        return categoryService.findServiceCategory();
     }
 
     @GetMapping("/getproductcategories")
@@ -228,15 +242,6 @@ public class AdminController {
             return ResponseEntity.badRequest().body(result.getAllErrors());
         }
         ServiceProvider savedsp = serviceProviderService.addNewSP(sp);
-        return ResponseEntity.ok(savedsp);
-    }
-
-    @PutMapping("/updatesp/{id}")
-    public ResponseEntity<?> updateSP(@PathVariable int id,@Valid @RequestBody ServiceProvider sp, BindingResult result){
-        if (result.hasErrors()) {
-            return ResponseEntity.badRequest().body(result.getAllErrors());
-        }
-        ServiceProvider savedsp = serviceProviderService.updateServiceProvider(id,sp);
         return ResponseEntity.ok(savedsp);
     }
 

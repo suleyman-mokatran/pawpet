@@ -19,6 +19,9 @@ public class NotificationHandler extends TextWebSocketHandler {
 
     private static final Map<Integer, WebSocketSession> ppSessions = new HashMap<>();
 
+    private static final Map<Integer, WebSocketSession> spSessions = new HashMap<>();
+
+
 
 
     @Override
@@ -46,8 +49,14 @@ public class NotificationHandler extends TextWebSocketHandler {
                 try {
                     int userId = Integer.parseInt(query.split("=")[1]);
                     ppSessions.put(userId, session);
-                    System.out.println("✅ User " + userId + " WebSocket session stored!");
-                    System.out.println("Current userSessions: " + userSessions.keySet());
+                } catch (NumberFormatException e) {
+                    System.out.println("❌ Invalid userId format in query: " + query);
+                }
+            }
+            else if (query.startsWith("spId=")) {
+                try {
+                    int userId = Integer.parseInt(query.split("=")[1]);
+                    spSessions.put(userId, session);
                 } catch (NumberFormatException e) {
                     System.out.println("❌ Invalid userId format in query: " + query);
                 }
@@ -123,4 +132,21 @@ public class NotificationHandler extends TextWebSocketHandler {
             System.out.println("❌ Message NOT stored. Missed notifications are disabled.");
         }
     }
+
+    public void sendNotificationToSP(int spId, String message) throws IOException {
+        System.out.println("sendNotificationToDoctor CALLED for spId: " + spId + " with message: " + message);
+
+        WebSocketSession session = spSessions.get(spId);
+        boolean sessionActive = session != null && session.isOpen();
+        System.out.println("Checking session status for sp " + spId + ": " + sessionActive);
+
+        if (sessionActive) {
+            session.sendMessage(new TextMessage(message));
+            System.out.println("✅ Sent message: " + message);
+        } else {
+            System.out.println("❌ No active WebSocket session found for spId " + spId);
+            System.out.println("❌ Message NOT stored. Missed notifications are disabled.");
+        }
+    }
+
 }

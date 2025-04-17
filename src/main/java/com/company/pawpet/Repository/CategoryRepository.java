@@ -27,4 +27,10 @@ public interface CategoryRepository extends JpaRepository<Category,Integer> {
             nativeQuery = true)
     List<Map<String,String>> findAllProductCategories();
 
+    @Query(value = "SELECT cm.category_category_id, cm.mscategory, cm.mscategory_key " +
+            "FROM category_mscategory cm " +
+            "JOIN categories c ON cm.category_category_id = c.category_id " +
+            "WHERE c.type = 'service'",
+            nativeQuery = true)
+    List<Map<String,String>> findAllServiceCategories();
 }

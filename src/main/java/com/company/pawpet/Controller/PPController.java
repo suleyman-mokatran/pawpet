@@ -114,7 +114,7 @@ public class PPController {
     }
 
     @GetMapping("/getproductcategories")
-    public List<Map<String, String>> findProducttCategories() {
+    public List<Map<String, String>> findProductCategories() {
         return categoryService.findProductCategory();
     }
 

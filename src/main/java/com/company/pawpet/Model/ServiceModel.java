@@ -1,5 +1,6 @@
 package com.company.pawpet.Model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.util.List;
@@ -17,10 +18,16 @@ public class ServiceModel {
     String Description;
     float Price;
 
+    @ManyToOne
+    @JoinColumn(name = "Category")
+    private Category serviceCategory;
+
     @OneToMany(mappedBy = "Service", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Appointment> appointmentList;
 
     @OneToMany(mappedBy = "Service", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Review> reviewList;
 
     @OneToOne(cascade = CascadeType.ALL)
@@ -30,6 +37,14 @@ public class ServiceModel {
     @ManyToOne
     @JoinColumn(name = "ServiceProviderId")
     private ServiceProvider serviceProvider;
+
+    public Category getServiceCategory() {
+        return serviceCategory;
+    }
+
+    public void setServiceCategory(Category serviceCategory) {
+        this.serviceCategory = serviceCategory;
+    }
 
     public int getServiceId() {
         return ServiceId;

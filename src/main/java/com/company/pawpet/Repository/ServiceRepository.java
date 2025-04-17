@@ -1,5 +1,6 @@
 package com.company.pawpet.Repository;
 
+import com.company.pawpet.Model.Product;
 import com.company.pawpet.Model.ServiceModel;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -16,4 +17,7 @@ public interface ServiceRepository extends JpaRepository<ServiceModel,Integer> {
 
     @Query(value = "SELECT * FROM Services WHERE company_id = :companyId", nativeQuery = true)
     List<ServiceModel> findServicesByCompany(@Param("companyId") int companyId);
+
+    @Query(value = "SELECT * FROM services WHERE service_provider_id = :providerId", nativeQuery = true)
+    List<ServiceModel> findServicesByProviderId(@Param("providerId") int providerId);
 }
