@@ -17,6 +17,11 @@ public class Order {
     int OrderId;
     float TotalPrice;
     boolean done=false;
+    String Email;
+    String fullName;
+    String phone;
+    String location;
+    String pay;
 
     @CreationTimestamp
     @Column(updatable = false)
@@ -29,6 +34,46 @@ public class Order {
     @ManyToOne
     @JoinColumn(name = "AppUserId")
     private AppUser appUser;
+
+    public String getPay() {
+        return pay;
+    }
+
+    public void setPay(String pay) {
+        this.pay = pay;
+    }
+
+    public String getEmail() {
+        return Email;
+    }
+
+    public void setEmail(String email) {
+        Email = email;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
 
     public boolean isDone() {
         return done;

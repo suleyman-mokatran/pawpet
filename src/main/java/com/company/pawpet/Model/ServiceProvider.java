@@ -20,9 +20,8 @@ public class ServiceProvider extends AppUser {
     @ElementCollection
     private Map<String, String> availableDays;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne
     @JoinColumn(name = "CompanyId", referencedColumnName = "CompanyId")
-    @JsonIgnore
     private Company company;
 
     public Map<String, String> getAvailableDays() {

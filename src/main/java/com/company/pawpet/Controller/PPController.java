@@ -143,11 +143,10 @@ public class PPController {
         return ResponseEntity.ok(groupedByOrder);
     }
 
-    @GetMapping("/getcustomer/{orderid}")
-    public ResponseEntity<AppUser> getCustomer(@PathVariable int orderid){
+    @GetMapping("/getorderinfo/{orderid}")
+    public ResponseEntity<Order> getOrderInfo(@PathVariable int orderid){
       Order order = orderService.getOrderById(orderid).orElseThrow();
-AppUser appUser = order.getAppUser();
-    return ResponseEntity.ok(appUser);
+    return ResponseEntity.ok(order);
     }
 
     @GetMapping("/getorderitems/{orderId}")

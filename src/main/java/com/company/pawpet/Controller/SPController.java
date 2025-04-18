@@ -117,7 +117,7 @@ public class SPController {
     @GetMapping("/getsp/{id}")
     public ResponseEntity<ServiceProvider> getSpById(@PathVariable int id) {
 
-        ServiceProvider sp = serviceProviderService.getSPById(id).orElseThrow();
+        ServiceProvider sp = serviceProviderService.getSPById(id);
         return ResponseEntity.ok(sp);
     }
 

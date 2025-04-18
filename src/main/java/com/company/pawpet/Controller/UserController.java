@@ -359,6 +359,11 @@ public class UserController {
             Cart cart = appUser.getCart();
             List<Integer> cartItems = request.getCartItems();
                 Order userOrder = orderService.saveOrder(userid);
+                userOrder.setPhone(request.getPhone());
+                userOrder.setLocation(request.getLocation());
+                userOrder.setFullName(request.getFullName());
+                userOrder.setEmail(request.getEmail());
+                userOrder.setPay("Paid");
                 orderId = userOrder.getOrderId();
                 for(int item : cartItems){
                     CartItem cartItem = cartItemService.getCartItemById(item).orElseThrow();
@@ -479,6 +484,64 @@ public class UserController {
                     .body("Error rescheduling appointment: " + e.getMessage());
         }
     }
+
+    @PostMapping("/cod/{userid}")
+    public ResponseEntity<Map<String, String>> makeOrderCod(@PathVariable int userid,@RequestBody PaymentRequest request) throws IOException {
+            int orderId;
+            List<Integer> ppIds = new ArrayList<>();
+            AppUser appUser = appUserService.getUserById(userid).orElseThrow();
+            Cart cart = appUser.getCart();
+            List<Integer> cartItems = request.getCartItems();
+            Order userOrder = orderService.saveOrder(userid);
+            userOrder.setPhone(request.getPhone());
+            userOrder.setLocation(request.getLocation());
+            userOrder.setFullName(request.getFullName());
+            userOrder.setEmail(request.getEmail());
+            userOrder.setPay("Cash On Delivery");
+            orderId = userOrder.getOrderId();
+            for(int item : cartItems){
+                CartItem cartItem = cartItemService.getCartItemById(item).orElseThrow();
+                OrderItem orderItem = new OrderItem();
+                orderItem.setPrice(cartItem.getPrice());
+                orderItem.setQuantity(cartItem.getQuantity());
+                OrderItem savedItem = orderItemService.saveOrderItem(orderId,cartItem.getProduct().getProductId(), orderItem);
+                Product product = savedItem.getProduct();
+                int newPP = product.getProductProvider().getAppUserId();
+                if(ppIds.isEmpty()){
+                    ppIds.add(newPP);
+                    notificationHandler.sendNotificationToPP(newPP, "New Order!");
+                }
+                else{
+                    if(!ppIds.contains(newPP)){
+                        ppIds.add(newPP);
+                        notificationHandler.sendNotificationToPP(newPP, "New Order!");
+                    }
+                }
+
+                String colorAndSize = cartItem.getColor() + '-' + cartItem.getSize();
+                int productQuantity = product.getStockByColorAndSize().get(colorAndSize);
+                Map<String, Integer> stockMap = product.getStockByColorAndSize();
+                stockMap.put(colorAndSize,productQuantity - cartItem.getQuantity());
+                product.setStockByColorAndSize(stockMap);
+                productService.updateProduct(product.getProductCategory().getCategoryId(),product.getProductId(),product);
+                userOrder.getOrderItemList().add(savedItem);
+                cartItem.setCart(null);
+                cart.getCartItemList().remove(cartItem);
+                cartItemService.deleteCartItem(item);
+            }
+            Order updatedOrder = orderService.updateOrder(orderId,userOrder);
+            if(cart.getCartItemList() == null || cart.getCartItemList().isEmpty()) {
+                appUser.setCart(null);
+                userRepository.save(appUser);
+            }
+
+            return ResponseEntity.ok(Map.of(
+                    "status", "success",
+                    "message", "Cash on delivery accepted"
+            ));
+
+    }
+
 
 
 

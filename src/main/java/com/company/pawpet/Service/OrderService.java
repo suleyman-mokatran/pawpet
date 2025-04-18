@@ -50,6 +50,11 @@ public class OrderService {
             total += item.getPrice()*item.getQuantity();
         }
         existingOrder.setTotalPrice(total);
+        existingOrder.setEmail(order.getEmail());
+        existingOrder.setLocation(order.getLocation());
+        existingOrder.setFullName(order.getFullName());
+        existingOrder.setPhone(order.getPhone());
+        existingOrder.setPay(order.getPay());
         return orderRepository.save(existingOrder);
     }
 

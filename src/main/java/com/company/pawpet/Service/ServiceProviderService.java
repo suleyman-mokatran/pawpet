@@ -97,8 +97,8 @@ public class ServiceProviderService {
             return serviceProvider.getAvailableDays();
     }
 
-    public  Optional<ServiceProvider> getSPById(int spId) {
-        return serviceProviderRepository.findById(spId);
+    public  ServiceProvider getSPById(int spId) {
+        return serviceProviderRepository.findById(spId).orElseThrow();
     }
 
 }

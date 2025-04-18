@@ -24,7 +24,7 @@ public class ServiceService {
     public ServiceModel addNewService(int categoryId,int spId,ServiceModel service) {
         ServiceModel newService = new ServiceModel();
         Category category = categoryService.findById(categoryId);
-        ServiceProvider sp = serviceProviderService.getSPById(spId).orElseThrow();
+        ServiceProvider sp = serviceProviderService.getSPById(spId);
 
         newService.setServiceCategory(category);
         newService.setCompany(sp.getCompany());
