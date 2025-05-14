@@ -24,6 +24,7 @@ public class Product {
     @Lob
     private byte[] image;
 
+
    @ElementCollection
     Map<String,Integer> stockByColorAndSize;
 
@@ -46,6 +47,7 @@ public class Product {
     private ProductProvider ProductProvider;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Review> reviewList;
 
     @ManyToOne

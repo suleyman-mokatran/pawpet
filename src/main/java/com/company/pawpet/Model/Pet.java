@@ -27,6 +27,7 @@ public class Pet {
 
     String Gender;
     String Status;
+    boolean forAdoption;
     int Weight;
     int Age;
 
@@ -57,9 +58,6 @@ public class Pet {
     @JsonProperty("petUserId")
     private AppUser appUser;
 
-    @ManyToOne
-    @JoinColumn(name = "AdopterId")
-    private AppUser Adopter;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "CategoryId")
@@ -98,6 +96,14 @@ public class Pet {
 
     public void setAppointmentList(List<Appointment> appointmentList) {
         this.appointmentList = appointmentList;
+    }
+
+    public boolean isForAdoption() {
+        return forAdoption;
+    }
+
+    public void setForAdoption(boolean forAdoption) {
+        this.forAdoption = forAdoption;
     }
 
     public byte[] getImage() {return image;}
@@ -212,13 +218,6 @@ public class Pet {
         this.appUser = appUser;
     }
 
-    public AppUser getAdopter() {
-        return Adopter;
-    }
-
-    public void setAdopter(AppUser adopter) {
-        Adopter = adopter;
-    }
 
     public Category getPetCategory() {
         return PetCategory;

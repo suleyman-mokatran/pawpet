@@ -1,5 +1,6 @@
 package com.company.pawpet.Controller;
 
+import com.company.pawpet.Model.AppUser;
 import com.company.pawpet.Model.Appointment;
 import com.company.pawpet.Model.Doctor;
 import com.company.pawpet.Model.Pet;
@@ -10,6 +11,7 @@ import com.company.pawpet.Service.AppUserService;
 import com.company.pawpet.Service.AppointmentService;
 import com.company.pawpet.Service.DoctorService;
 import com.company.pawpet.Service.PetService;
+import com.company.pawpet.chat.MessageRepository;
 import com.company.pawpet.notification.NotificationHandler;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -61,6 +64,9 @@ public class DoctorController {
 
     @Autowired
     PetService petService;
+
+    @Autowired
+    MessageRepository messageRepository;
 
     @GetMapping("/profile")
     public ResponseEntity<Doctor> getUserProfile(@AuthenticationPrincipal UserDetails userDetails) {
@@ -214,5 +220,39 @@ public class DoctorController {
         appointment.setStatus("missed");
         return ResponseEntity.ok(appointmentService.updateDoctorAppointment(id,appointment));
     }
+
+    @GetMapping("/chats")
+    public List<AppUser> getAllChatUsers(@RequestParam Long doctorId) {
+        List<Long> receiversIds =  messageRepository.findDistinctUserIdsByReceiverId(doctorId);
+        List<AppUser> receivers = new ArrayList<>();
+        for(Long r : receiversIds){
+            receivers.add(appUserService.getUserById(r.intValue()).orElseThrow());
+        }
+        return receivers;
+    }
+
+    @PutMapping("/setavailability/{doctorid}")
+    public ResponseEntity<String> setAvailability(@PathVariable int doctorid,@RequestBody Map<String,String> availability){
+        doctorService.setAvailability(doctorid,availability);
+        return ResponseEntity.ok("success");
+    }
+
+    @GetMapping("/getavailability/{doctorid}")
+    public ResponseEntity<Map<String,String>> getAvailability(@PathVariable int doctorid){
+        return ResponseEntity.ok(doctorService.getAvailability(doctorid));
+    }
+
+    @GetMapping("/getbookedappointments/{id}")
+    public ResponseEntity<List<Appointment>> bookedAppointments(@PathVariable int id){
+        List<Appointment> all = appointmentService.findAppointmentsByDoctorId(id);
+        List<Appointment> booked = new ArrayList<>();
+        for(Appointment appointment : all){
+            if(appointment.isBooked()){
+                booked.add(appointment);
+            }
+        }
+        return ResponseEntity.ok(booked);
+    }
+
 
 }

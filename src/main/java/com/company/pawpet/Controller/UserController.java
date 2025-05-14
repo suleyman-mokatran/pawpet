@@ -3,6 +3,8 @@ package com.company.pawpet.Controller;
 import com.company.pawpet.Model.*;
 import com.company.pawpet.PaymentRequest;
 import com.company.pawpet.Repository.CartRepository;
+import com.company.pawpet.chat.Message;
+import com.company.pawpet.chat.MessageRepository;
 import com.company.pawpet.notification.NotificationHandler;
 import com.company.pawpet.PasswordUpdateRequest;
 import com.company.pawpet.Repository.UserRepository;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @RestController
@@ -33,6 +36,9 @@ public class UserController {
     public UserController(NotificationHandler notificationHandler) {
         this.notificationHandler = notificationHandler;
     }
+
+    @Autowired
+    MessageRepository messageRepository;
 
     @Autowired
     AppUserService appUserService;
@@ -72,6 +78,12 @@ public class UserController {
 
    @Autowired
     ServiceService serviceService;
+
+   @Autowired
+   PostService postService;
+
+   @Autowired
+   ReviewService reviewService;
 
     @GetMapping("/profile")
     public ResponseEntity<AppUser> getUserProfile(@AuthenticationPrincipal UserDetails userDetails) {
@@ -539,7 +551,178 @@ public class UserController {
                     "status", "success",
                     "message", "Cash on delivery accepted"
             ));
+    }
 
+    @GetMapping("/getposts")
+    public ResponseEntity<List<Post>> getAllPosts(){
+        return ResponseEntity.ok(postService.getAllPosts());
+    }
+
+    @PostMapping("/addfoundlostpost/{id}")
+    public int addNewLostFoundPost(@PathVariable int id,@RequestBody Post post){
+        return postService.addLostFoundPost(id,post);
+    }
+
+    @PutMapping("/markaslost/{id}")
+    public Pet markAsLost(@PathVariable int id){
+            return petService.markAsLost(id);
+    }
+
+    @PutMapping("/markasfound/{id}")
+    public Pet markAsFound(@PathVariable int id){
+        return petService.markAsFound(id);
+    }
+
+    @DeleteMapping("/deletepost/{id}")
+    public void deleteLostFoundPost(@PathVariable int id){
+        postService.deletePost(id);
+    }
+
+    @GetMapping("/getuserposts/{id}")
+    public ResponseEntity<List<Post>> getUserPosts(@PathVariable int id){
+        return ResponseEntity.ok(postService.getUserPosts(id));
+    }
+
+    @GetMapping("/getpost/{id}")
+    public ResponseEntity<Post> getPostById(@PathVariable int id){
+        return ResponseEntity.ok(postService.getPostById(id));
+    }
+
+    @PutMapping("/updatepost/{id}")
+    public ResponseEntity<Post> updatePost(@PathVariable int id, @RequestBody Post post){
+        return ResponseEntity.ok(postService.updatePost(id,post));
+    }
+
+
+    @PostMapping("/addforadoptionpost/{id}")
+    public int addNewForAdoptionPost(@PathVariable int id,@RequestBody Post post){
+        return postService.addForAdoptionPost(id,post);
+    }
+
+
+    @PutMapping("/foradoption/{id}")
+    public Pet markPetForAdoption(@PathVariable int id){
+        return petService.forAdoption(id);
+    }
+
+    @PutMapping("/cancelforadoption/{id}")
+    public Pet CancelForAdoption(@PathVariable int id){
+        return petService.cancelForAdoption(id);
+    }
+
+    @PostMapping("/addpost/{id}")
+    public int addNewPost(@PathVariable int id,@RequestBody Post post){
+        return postService.addPost(id,post);
+    }
+
+    @GetMapping("/getadoptionposts/{id}")
+    public ResponseEntity<List<Post>> getAdoptionPosts(@PathVariable int id){
+       List<Post> posts=  postService.getAllPosts();
+       List<Post> adoptionPosts = new ArrayList<>();
+       for(Post p : posts){
+           boolean isAdoption = p.getType().equals("For Adoption") || p.getType().equals("For Adoption CD");
+           int PosterId = p.getAppUser().getAppUserId();
+           boolean isNotPoster = PosterId!=id;
+
+           if (isAdoption && isNotPoster) {
+               adoptionPosts.add(p);
+           }
+       }
+       return ResponseEntity.ok(adoptionPosts);
+    }
+
+    @GetMapping("/getlostfoundposts/{id}")
+    public ResponseEntity<List<Post>> getLostFoundPosts(@PathVariable int id){
+        List<Post> posts=  postService.getAllPosts();
+        List<Post> lostFoundPosts = new ArrayList<>();
+        for(Post p : posts){
+           boolean isLostFound = p.getType().equals("Lost-Found")||p.getType().equals("Lost-Found-CD");
+
+            int PosterId = p.getAppUser().getAppUserId();
+            boolean isNotPoster = PosterId!=id;
+
+            if (isLostFound && isNotPoster) {
+                lostFoundPosts.add(p);
+            }
+            }
+
+        return ResponseEntity.ok(lostFoundPosts);
+    }
+
+    @GetMapping("/chats")
+    public List<AppUser> getAllChatUsers(@RequestParam Long userId) {
+        List<Long> receiversIds =  messageRepository.findDistinctUserIdsByReceiverId(userId);
+        List<AppUser> receivers = new ArrayList<>();
+        for(Long r : receiversIds){
+            receivers.add(appUserService.getUserById(r.intValue()).orElseThrow());
+        }
+        return receivers;
+    }
+
+    @PutMapping("/confirmadoption/{adopterId}/{petId}")
+    public void confirmAdoption(@PathVariable int adopterId,@PathVariable int petId){
+        petService.transferPetFile(adopterId,petId);
+
+    }
+
+    @PostMapping("/ratedoctor/{userid}/{doctorid}")
+    public ResponseEntity<Review> rateDoctor(@PathVariable int userid, @PathVariable int doctorid,@RequestBody Review review){
+        return ResponseEntity.ok(reviewService.addDoctorReview(userid,doctorid,review));
+    }
+
+    @PostMapping("/rateproduct/{userid}/{productid}")
+    public ResponseEntity<Review> rateProduct(@PathVariable int userid, @PathVariable int productid,@RequestBody Review review){
+        return ResponseEntity.ok(reviewService.addProductReview(userid,productid,review));
+    }
+
+    @PostMapping("/rateservice/{userid}/{serviceid}")
+    public ResponseEntity<Review> rateService(@PathVariable int userid, @PathVariable int serviceid,@RequestBody Review review){
+        return ResponseEntity.ok(reviewService.addServiceReview(userid,serviceid,review));
+    }
+
+    @GetMapping("/getdoctorreviews/{doctorid}")
+    public ResponseEntity<List<Review>> getDoctorReviews(@PathVariable int doctorid){
+        return  ResponseEntity.ok(reviewService.getDoctorReviews(doctorid));
+    }
+
+    @GetMapping("/getproductreviews/{productid}")
+    public ResponseEntity<List<Review>> getProductReviews(@PathVariable int productid){
+        return  ResponseEntity.ok(reviewService.getProductReviews(productid));
+    }
+
+    @GetMapping("/getservicereviews/{serviceid}")
+    public ResponseEntity<List<Review>> getServiceReviews(@PathVariable int serviceid){
+        return  ResponseEntity.ok(reviewService.getServiceReviews(serviceid));
+    }
+
+    @GetMapping("/getReview/{id}")
+    public ResponseEntity<Review> getReviewById(@PathVariable int id){
+        return ResponseEntity.ok(reviewService.getReviewById(id));
+    }
+
+    @PutMapping("/updatereview/{id}")
+    public ResponseEntity<Review> updateReview(@PathVariable int id,@RequestBody Review review){
+        return ResponseEntity.ok(reviewService.editReview(id,review));
+    }
+
+    @DeleteMapping("/deletereview/{id}")
+    public void deleteReview(@PathVariable int id){
+        reviewService.deleteReview(id);
+    }
+
+    @GetMapping("/doctoraverage/{id}")
+    public ResponseEntity<Integer> doctorOverAllRatings(@PathVariable int id){
+        return ResponseEntity.ok(reviewService.doctorRatingAverage(id));
+    }
+
+    @GetMapping("/productaverage/{id}")
+    public ResponseEntity<Integer> productOverAllRatings(@PathVariable int id){
+        return ResponseEntity.ok(reviewService.productRatingAverage(id));
+    }
+
+    @GetMapping("/serviceaverage/{id}")
+    public ResponseEntity<Integer> serviceOverAllRatings(@PathVariable int id){
+        return ResponseEntity.ok(reviewService.serviceRatingAverage(id));
     }
 
 

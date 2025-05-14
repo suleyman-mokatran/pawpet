@@ -1,8 +1,8 @@
 package com.company.pawpet.Model;
 
 import com.company.pawpet.Enum.Role;
+import com.company.pawpet.chat.Message;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -63,15 +63,14 @@ public class AppUser implements UserDetails {
     @JsonIgnore
     private List<Appointment> appointmentList;
 
+    @OneToMany(mappedBy = "appUser", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<Post> posts;
+
     @ElementCollection
     @JsonIgnore
     @OneToMany(mappedBy = "appUser", cascade = CascadeType.ALL)
     private List<Pet> petList;
-
-
-    @OneToMany(mappedBy = "appUser", cascade = CascadeType.ALL)
-    @JsonIgnore
-    private List<Pet> AdoptedPets;
 
     @OneToMany(mappedBy = "appUser", cascade = CascadeType.ALL)
     @JsonIgnore
@@ -80,6 +79,14 @@ public class AppUser implements UserDetails {
     @OneToMany(mappedBy = "appUser", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<Review> reviewList;
+
+    @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<Message> sentMessages;
+
+    @OneToMany(mappedBy = "receiver", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<Message> receivedMessages;
 
     @OneToOne(mappedBy = "appUser", cascade = CascadeType.ALL, orphanRemoval = true)
     private Cart cart;
@@ -194,13 +201,6 @@ public class AppUser implements UserDetails {
         this.petList = petList;
     }
 
-    public List<Pet> getAdoptedPets() {
-        return AdoptedPets;
-    }
-
-    public void setAdoptedPets(List<Pet> adoptedPets) {
-        AdoptedPets = adoptedPets;
-    }
 
     public List<Order> getOrderList() {
         return orderList;

@@ -4,6 +4,7 @@ package com.company.pawpet.Service;
 import com.company.pawpet.Enum.Role;
 import com.company.pawpet.Model.AppUser;
 import com.company.pawpet.Model.Doctor;
+import com.company.pawpet.Model.ServiceProvider;
 import com.company.pawpet.Repository.DoctorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -72,9 +74,11 @@ public class DoctorService {
     public void deleteDoctor(int doctorId){
         doctorRepository.deleteById(doctorId);
     }
+
     public List<Doctor> getAllDoctors(){
         return doctorRepository.findAll();
     }
+
     public Optional<Doctor> findById(int doctorId){
         return doctorRepository.findById(doctorId);
     }
@@ -100,6 +104,17 @@ public class DoctorService {
         else{
             return available;
         }
+    }
+
+    public void setAvailability(int doctorId, Map<String,String> availability){
+        Doctor doctor = doctorRepository.findById(doctorId).orElseThrow();
+        doctor.setAvailableDays(availability);
+        doctorRepository.save(doctor);
+    }
+
+    public Map<String,String> getAvailability(int doctorId){
+        Doctor doctor = doctorRepository.findById(doctorId).orElseThrow();
+        return doctor.getAvailableDays();
     }
 }
 

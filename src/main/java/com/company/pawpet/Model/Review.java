@@ -1,6 +1,10 @@
 package com.company.pawpet.Model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
@@ -10,9 +14,11 @@ public class Review {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     int ReviewId;
-    String Rating;
+    double Rating;
+
+    @Lob
     String Comment;
-    Date date;
+    LocalDateTime date;
 
     @ManyToOne
     @JoinColumn(name = "product")
@@ -26,6 +32,42 @@ public class Review {
     @JoinColumn(name = "Service")
     private ServiceModel Service;
 
+    @ManyToOne
+    @JoinColumn(name = "Doctor")
+    private Doctor Doctor;
+
+    public Product getProduct() {
+        return product;
+    }
+
+    public void setProduct(Product product) {
+        this.product = product;
+    }
+
+    public AppUser getAppUser() {
+        return appUser;
+    }
+
+    public void setAppUser(AppUser appUser) {
+        this.appUser = appUser;
+    }
+
+    public ServiceModel getService() {
+        return Service;
+    }
+
+    public void setService(ServiceModel service) {
+        Service = service;
+    }
+
+    public com.company.pawpet.Model.Doctor getDoctor() {
+        return Doctor;
+    }
+
+    public void setDoctor(com.company.pawpet.Model.Doctor doctor) {
+        Doctor = doctor;
+    }
+
     public int getReviewId() {
         return ReviewId;
     }
@@ -34,11 +76,11 @@ public class Review {
         ReviewId = reviewId;
     }
 
-    public String getRating() {
+    public double getRating() {
         return Rating;
     }
 
-    public void setRating(String rating) {
+    public void setRating(double rating) {
         Rating = rating;
     }
 
@@ -50,11 +92,11 @@ public class Review {
         Comment = comment;
     }
 
-    public Date getDate() {
+    public LocalDateTime getDate() {
         return date;
     }
 
-    public void setDate(Date date) {
+    public void setDate(LocalDateTime date) {
         this.date = date;
     }
 }

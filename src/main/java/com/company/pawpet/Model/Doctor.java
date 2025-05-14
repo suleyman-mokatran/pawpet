@@ -1,6 +1,7 @@
 package com.company.pawpet.Model;
 
 import com.company.pawpet.Enum.Role;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -16,10 +17,22 @@ public class Doctor extends AppUser {
     private Map<String, String> availableDays;
     int experienceYears;
 
+    @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<Review> reviewList;
+
     public Doctor() {
     }
 
+    @Override
+    public List<Review> getReviewList() {
+        return reviewList;
+    }
 
+    @Override
+    public void setReviewList(List<Review> reviewList) {
+        this.reviewList = reviewList;
+    }
 
     @OneToMany(mappedBy = "Doctor", cascade = CascadeType.ALL)
     private List<Appointment> appointmentList;

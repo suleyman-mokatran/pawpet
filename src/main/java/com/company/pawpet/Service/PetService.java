@@ -3,9 +3,13 @@ package com.company.pawpet.Service;
 import com.company.pawpet.Model.AppUser;
 import com.company.pawpet.Model.Category;
 import com.company.pawpet.Model.Pet;
+import com.company.pawpet.Model.Post;
 import com.company.pawpet.Repository.CategoryRepository;
 import com.company.pawpet.Repository.PetRepository;
+import com.company.pawpet.Repository.PostRepository;
 import com.company.pawpet.Repository.UserRepository;
+import com.company.pawpet.chat.Message;
+import com.company.pawpet.chat.MessageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +33,12 @@ public class PetService {
     @Autowired
     CategoryService categoryService;
 
+    @Autowired
+    PostRepository postRepository;
+
+    @Autowired
+    MessageRepository messageRepository;
+
     public Pet addNewPet(Pet pet, int userId,int categoryId){
 
         Category category = categoryService.findById(categoryId);
@@ -39,8 +49,9 @@ public class PetService {
         newPet.setCreatedAt(LocalDateTime.now());
         newPet.setImage(pet.getImage());
         newPet.setGender(pet.getGender());
-        newPet.setStatus(pet.getStatus());
+        newPet.setStatus("Adopted");
         newPet.setWeight(pet.getWeight());
+        newPet.setForAdoption(false);
         newPet.setAge(pet.getAge());
         newPet.setVaccinationRecord(pet.getVaccinationRecord());
         newPet.setMedicalConditions(pet.getMedicalConditions());
@@ -89,7 +100,6 @@ public class PetService {
 
         petToUpdate.setPetName(pet.getPetName());
         petToUpdate.setGender(pet.getGender());
-        petToUpdate.setStatus(pet.getStatus());
         petToUpdate.setImage(pet.getImage());
         petToUpdate.setWeight(pet.getWeight());
         petToUpdate.setAge(pet.getAge());
@@ -107,5 +117,55 @@ public class PetService {
     public List<Pet> getAllPets(int id) {
         return petRepository.findPetsByUserId(id);}
 
+    public List<Pet> getFoundLostPes(){
+        List<Pet> allPets = petRepository.findAll();
+        List<Pet> lostOrFound = new ArrayList<>();
+        for(Pet p : allPets){
+            if(!p.getStatus().equals("adopted")){
+                lostOrFound.add(p);
+            }
+        }
+        return lostOrFound;
+    }
 
+    public Pet markAsLost(int id){
+        Pet pet = petRepository.findById(id).orElseThrow();
+        pet.setStatus("Lost");
+        petRepository.save(pet);
+        return pet;
+    }
+
+    public Pet markAsFound(int id){
+        Pet pet = petRepository.findById(id).orElseThrow();
+        pet.setStatus("Adopted");
+        petRepository.save(pet);
+        return pet;
+    }
+
+    public Pet forAdoption(int id){
+        Pet pet = petRepository.findById(id).orElseThrow();
+        pet.setForAdoption(true);
+        petRepository.save(pet);
+        return pet;
+    }
+
+    public Pet cancelForAdoption(int id){
+        Pet pet = petRepository.findById(id).orElseThrow();
+        messageRepository.deleteMessagesByPetId(id);
+        pet.setForAdoption(false);
+        petRepository.save(pet);
+        return pet;
+    }
+
+        public void transferPetFile(int adopterId,int petId){
+        AppUser adopter = appUserRepository.findById(adopterId).orElseThrow();
+        Pet pet = petRepository.findById(petId).orElseThrow();
+        postRepository.deletePostImagesByPetId(petId);
+        postRepository.deletePostsByPetId(petId);
+        pet.setForAdoption(false);
+        pet.setAppUser(adopter);
+        petRepository.save(pet);
+
+
+        }
 }
