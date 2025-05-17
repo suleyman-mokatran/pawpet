@@ -13,6 +13,12 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Intege
     @Query(value = "SELECT * FROM Appointment WHERE doctor_id = :doctorId", nativeQuery = true)
     List<Appointment> findAppointmentsByDoctor(@Param("doctorId") int doctorId);
 
+    @Query(value = "SELECT * FROM Appointment WHERE booked = 1 && doctor_id = :doctorId", nativeQuery = true)
+    List<Appointment> findBookedAppointmentsByDoctor(@Param("doctorId") int doctorId);
+
+    @Query(value = "SELECT * FROM Appointment WHERE booked = 1 && service_id = :serviceId", nativeQuery = true)
+    List<Appointment> findBookedAppointmentsByService(@Param("serviceId") int serviceId);
+
     @Query(value = "SELECT * FROM Appointment WHERE service_id = :serviceId", nativeQuery = true)
     List<Appointment> findAppointmentsByService(@Param("serviceId") int serviceId);
 

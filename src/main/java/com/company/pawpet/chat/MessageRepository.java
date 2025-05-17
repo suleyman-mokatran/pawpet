@@ -11,13 +11,18 @@ import java.util.List;
 public interface MessageRepository extends JpaRepository<Message, Long> {
     List<Message> findBySenderIdAndReceiverIdOrReceiverIdAndSenderId(Long senderId1, Long receiverId1, Long senderId2, Long receiverId2);
 
-    @Query("SELECT DISTINCT m.senderId FROM Message m WHERE m.receiverId = :doctorId")
-    List<Long> findDistinctUserIdsByReceiverId(@Param("doctorId") Long doctorId);
+
+    @Query("SELECT DISTINCT CASE WHEN m.senderId = :userId THEN m.receiverId ELSE m.senderId END " +
+            "FROM Message m " +
+            "WHERE m.receiverId = :userId OR m.senderId = :userId")
+    List<Long> findDistinctUserIdsInvolvedWithDoctor(@Param("userId") Long doctorId);
 
     @Modifying
     @Transactional
     @Query(value = "DELETE FROM message WHERE pet_id = :petId", nativeQuery = true)
     void deleteMessagesByPetId(@Param("petId") int petId);
+
+
 
 
 

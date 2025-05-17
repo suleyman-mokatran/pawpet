@@ -50,9 +50,9 @@ public class SecurityConfig {
                 .cors(cors -> {})
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**","/home/**","/ws-chat", "/ws-chat/**").permitAll()
+                        .requestMatchers("/auth/**","/home/**","/ws-chat", "/ws-chat/**","/messages/uploads/**","/api/**").permitAll()
                         .requestMatchers("/ws/**").permitAll()
-                        .requestMatchers("/messages/**").authenticated()
+                        .requestMatchers("/messages/send","/messages/history","/messages/deletemessage/**","/messages/upload","/messages/getreceiverinfo/**").authenticated()
                         .requestMatchers("/admin/**").hasRole("ADMIN") // Only Admins can access /admin/*
                         .requestMatchers("/user/**").hasRole("USER") // Only PetUsers can access /user/*
                         .requestMatchers("/doctor/**").hasRole("DOCTOR") // Only Doctors can access /doctor/*

@@ -50,6 +50,9 @@ public class PPController {
     AppUserService appUserService;
 
     @Autowired
+    NotificationService notificationService;
+
+    @Autowired
     ProductProviderRepository productProviderRepository;
 
     @GetMapping("/profile")
@@ -169,6 +172,27 @@ public class PPController {
     @GetMapping("/getorder/{orderid}")
     public ResponseEntity<Order> getOrder(@PathVariable int orderid){
         return ResponseEntity.ok(orderService.getOrderById(orderid).orElseThrow());
+    }
+
+    @GetMapping("/getnotifications/{id}")
+    public List<Notification> getNotifications(@PathVariable int id) {
+        return notificationService.getAllNotificationsForUser(id);
+    }
+
+    @GetMapping("/unreadCount/{id}")
+    public int getUnreadCount(@PathVariable int id) {
+        return notificationService.getUnreadCount(id);
+    }
+
+    @PutMapping("/markRead/{id}")
+    public void markAsRead(@PathVariable int id) {
+        notificationService.markAsRead(id);
+    }
+
+    @DeleteMapping("/deletenotification/{id}")
+    public ResponseEntity<String> deleteNotification(@PathVariable int id){
+        notificationService.deleteNotification(id);
+        return ResponseEntity.ok("deleted");
     }
 
 

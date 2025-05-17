@@ -1,6 +1,7 @@
 package com.company.pawpet.chat;
 
 import com.company.pawpet.Model.AppUser;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -16,10 +17,12 @@ public class Message {
 
     @ManyToOne
     @JoinColumn(name = "sender")
+    @JsonIgnoreProperties({"availableDays"})
     private AppUser sender;
 
     @ManyToOne
     @JoinColumn(name = "receiver")
+    @JsonIgnoreProperties({"availableDays"})
     private AppUser receiver;
 
     private String content;

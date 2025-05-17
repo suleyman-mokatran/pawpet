@@ -1,16 +1,10 @@
 package com.company.pawpet.Controller;
 
-import com.company.pawpet.Model.AppUser;
-import com.company.pawpet.Model.Appointment;
-import com.company.pawpet.Model.Doctor;
-import com.company.pawpet.Model.Pet;
+import com.company.pawpet.Model.*;
 import com.company.pawpet.PasswordUpdateRequest;
 import com.company.pawpet.Repository.AppointmentRepository;
 import com.company.pawpet.Repository.DoctorRepository;
-import com.company.pawpet.Service.AppUserService;
-import com.company.pawpet.Service.AppointmentService;
-import com.company.pawpet.Service.DoctorService;
-import com.company.pawpet.Service.PetService;
+import com.company.pawpet.Service.*;
 import com.company.pawpet.chat.MessageRepository;
 import com.company.pawpet.notification.NotificationHandler;
 import jakarta.validation.Valid;
@@ -67,6 +61,9 @@ public class DoctorController {
 
     @Autowired
     MessageRepository messageRepository;
+
+    @Autowired
+    NotificationService notificationService;
 
     @GetMapping("/profile")
     public ResponseEntity<Doctor> getUserProfile(@AuthenticationPrincipal UserDetails userDetails) {
@@ -127,6 +124,12 @@ public class DoctorController {
         return ResponseEntity.ok(appointments);
     }
 
+    @GetMapping("/getbookedappointments/{id}")
+    public ResponseEntity<List<Appointment>> getBookedAppointments(@PathVariable int id){
+        List<Appointment> appointments = appointmentService.findBookedAppointmentsByDoctorId(id);
+        return ResponseEntity.ok(appointments);
+    }
+
     @GetMapping("/getworkingtimebyday/{day}/{id}")
     public ResponseEntity<String> getWorkingTime(@PathVariable String day, @PathVariable int id){
         String time =  appointmentService.getWorkingTimeByDay(day,id);
@@ -150,45 +153,27 @@ public class DoctorController {
         return ResponseEntity.ok(appointment);
     }
 
+
+
     @GetMapping("/getappointmentbyid/{id}")
     public ResponseEntity<Appointment> getAppointment(@PathVariable int id){
         return ResponseEntity.ok(appointmentService.getAppointment(id));
     }
 
     @PutMapping("/cancelappointment/{id}")
-    public ResponseEntity<Appointment> cancelBooking(@PathVariable int id){
-    Appointment appointment = appointmentService.unbookAppointment(id);
-    return ResponseEntity.ok(appointment);
+    public ResponseEntity<Appointment> cancelBooking(@PathVariable int id) throws IOException {
+        Appointment appointment = appointmentService.getAppointment(id);
+        notificationHandler.sendNotificationToUser(appointment.getAppUser().getAppUserId(), "Your Appointment has canceled");
+        notificationService.addNewNotification(appointment.getAppUser().getAppUserId(),"Your booked appointment on "+appointment.getDayOfWeek()+" "+appointment.getSelectedDate()+" has canceled");
+        appointmentService.unbookAppointment(id);
+
+        return ResponseEntity.ok(appointment);
     }
 
     @GetMapping("/getpet/{id}")
     public ResponseEntity<Pet> getPetById(@PathVariable int id){
         Pet pet = petService.getPetById(id).orElseThrow();
         return ResponseEntity.ok(pet);
-    }
-
-    @PutMapping("/rescheduleappointment/{oldId}/{newId}/{userId}")
-    public ResponseEntity<String> rescheduleAppointment(@PathVariable int oldId,
-                                                        @PathVariable int newId,
-                                                        @PathVariable int userId) {
-        try {
-            appointmentService.rescheduleBookedAppointment(oldId, newId);
-
-            notificationHandler.sendNotificationToUser(userId, "Your appointment has rescheduled!");
-
-
-            return ResponseEntity.ok("Appointment rescheduled successfully!");
-        } catch (NoSuchElementException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Appointment not found!");
-        }
-        catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error sending notification: " + e.getMessage());
-        }
-        catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error rescheduling appointment: " + e.getMessage());
-        }
     }
 
     @PutMapping("/updatepet/{id}/{appointmentId}")
@@ -215,15 +200,18 @@ public class DoctorController {
     }
 
     @PutMapping("/updatemissedappointment/{id}")
-    public ResponseEntity<Appointment> updateMissedAppointment(@PathVariable int id){
+    public ResponseEntity<Appointment> updateMissedAppointment(@PathVariable int id) throws IOException {
         Appointment appointment = appointmentService.getAppointment(id);
         appointment.setStatus("missed");
+        notificationHandler.sendNotificationToUser(appointment.getAppUser().getAppUserId(), "You missed an appointment!");
+        notificationService.addNewNotification(appointment.getAppUser().getAppUserId(),"An Appointment has missed!");
+
         return ResponseEntity.ok(appointmentService.updateDoctorAppointment(id,appointment));
     }
 
     @GetMapping("/chats")
     public List<AppUser> getAllChatUsers(@RequestParam Long doctorId) {
-        List<Long> receiversIds =  messageRepository.findDistinctUserIdsByReceiverId(doctorId);
+        List<Long> receiversIds =  messageRepository.findDistinctUserIdsInvolvedWithDoctor(doctorId);
         List<AppUser> receivers = new ArrayList<>();
         for(Long r : receiversIds){
             receivers.add(appUserService.getUserById(r.intValue()).orElseThrow());
@@ -242,16 +230,25 @@ public class DoctorController {
         return ResponseEntity.ok(doctorService.getAvailability(doctorid));
     }
 
-    @GetMapping("/getbookedappointments/{id}")
-    public ResponseEntity<List<Appointment>> bookedAppointments(@PathVariable int id){
-        List<Appointment> all = appointmentService.findAppointmentsByDoctorId(id);
-        List<Appointment> booked = new ArrayList<>();
-        for(Appointment appointment : all){
-            if(appointment.isBooked()){
-                booked.add(appointment);
-            }
-        }
-        return ResponseEntity.ok(booked);
+    @GetMapping("/getnotifications/{id}")
+    public List<Notification> getNotifications(@PathVariable int id) {
+        return notificationService.getAllNotificationsForUser(id);
+    }
+
+    @GetMapping("/unreadCount/{id}")
+    public int getUnreadCount(@PathVariable int id) {
+        return notificationService.getUnreadCount(id);
+    }
+
+    @PutMapping("/markRead/{id}")
+    public void markAsRead(@PathVariable int id) {
+        notificationService.markAsRead(id);
+    }
+
+    @DeleteMapping("/deletenotification/{id}")
+    public ResponseEntity<String> deleteNotification(@PathVariable int id){
+        notificationService.deleteNotification(id);
+        return ResponseEntity.ok("deleted");
     }
 
 

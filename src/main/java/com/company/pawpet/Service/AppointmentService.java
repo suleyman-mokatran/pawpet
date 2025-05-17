@@ -6,6 +6,8 @@ import com.company.pawpet.Repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -141,6 +143,19 @@ public class AppointmentService {
 
     public List<Appointment> findAppointmentsByDoctorId(int id){
         return appointmentRepository.findAppointmentsByDoctor(id);
+    }
+
+    public List<Appointment> findBookedAppointmentsByDoctorId(int id){
+        return appointmentRepository.findBookedAppointmentsByDoctor(id);
+    }
+
+    public List<Appointment> findBookedAppointmentsBySpId(int id){
+        List<ServiceModel> services = serviceRepository.findServicesByProviderId(id);
+        List<Appointment> bookedAppointments = new ArrayList<>();
+        for (ServiceModel service : services){
+            bookedAppointments.addAll(appointmentRepository.findBookedAppointmentsByService(service.getServiceId()));
+        }
+        return bookedAppointments;
     }
 
     public List<Appointment> findAppointmentsByUserId(int id){

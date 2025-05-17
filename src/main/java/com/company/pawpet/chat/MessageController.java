@@ -1,12 +1,22 @@
 package com.company.pawpet.chat;
 
+import com.company.pawpet.Model.AppUser;
 import com.company.pawpet.Service.AppUserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/messages")
@@ -41,4 +51,31 @@ public class MessageController {
         return messageRepository.findBySenderIdAndReceiverIdOrReceiverIdAndSenderId(
                 senderId, receiverId, senderId, receiverId);
     }
+
+    @DeleteMapping("/deletemessage/{id}")
+    public ResponseEntity<?> deleteMessage(@PathVariable Long id) {
+        messageRepository.deleteById(id);
+        return ResponseEntity.ok("Message deleted successfully"); // 200 OK
+    }
+
+    @PostMapping("/upload")
+    public ResponseEntity<Map<String, String>> uploadImage(@RequestParam("image") MultipartFile file) {
+        String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+        Path imagePath = Paths.get("uploads", fileName);
+        try {
+            Files.createDirectories(imagePath.getParent());
+            Files.write(imagePath, file.getBytes());
+
+            String imageUrl = "http://10.0.2.2:8080/messages/uploads/" + fileName;
+            return ResponseEntity.ok(Map.of("imageUrl", imageUrl));
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @GetMapping("/getreceiverinfo/{id}")
+    public ResponseEntity<AppUser> getReceiverInfo(@PathVariable int id){
+       return ResponseEntity.ok(appUserService.getUserById(id).orElseThrow());
+    }
+
 }

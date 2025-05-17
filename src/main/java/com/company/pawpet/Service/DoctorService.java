@@ -3,6 +3,7 @@ package com.company.pawpet.Service;
 
 import com.company.pawpet.Enum.Role;
 import com.company.pawpet.Model.AppUser;
+import com.company.pawpet.Model.Appointment;
 import com.company.pawpet.Model.Doctor;
 import com.company.pawpet.Model.ServiceProvider;
 import com.company.pawpet.Repository.DoctorRepository;
@@ -10,7 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -20,6 +23,9 @@ public class DoctorService {
 
     @Autowired
     DoctorRepository doctorRepository;
+
+    @Autowired
+    AppointmentService appointmentService;
 
     final BCryptPasswordEncoder passwordEncoder;
 
@@ -106,11 +112,26 @@ public class DoctorService {
         }
     }
 
-    public void setAvailability(int doctorId, Map<String,String> availability){
+    public void setAvailability(int doctorId, Map<String, String> newAvailability) {
         Doctor doctor = doctorRepository.findById(doctorId).orElseThrow();
-        doctor.setAvailableDays(availability);
+        Map<String, String> oldAvailability = doctor.getAvailableDays();
+        List<Appointment> appointments = appointmentService.findAppointmentsByDoctorId(doctorId);
+        for (Map.Entry<String, String> entry : oldAvailability.entrySet()) {
+            String day = entry.getKey();
+            String oldTimeRange = entry.getValue();
+            String newTimeRange = newAvailability.get(day);
+            if (newTimeRange != null && !newTimeRange.trim().replaceAll("\\s+", "").equalsIgnoreCase(oldTimeRange.trim().replaceAll("\\s+", ""))) {
+                for (Appointment appointment : appointments) {
+                    if (appointment.getDayOfWeek().toString().equalsIgnoreCase(day)) {
+                        appointmentService.DeleteAppointment(appointment.getAppointmentId());
+                    }
+                }
+            }
+        }
+        doctor.setAvailableDays(newAvailability);
         doctorRepository.save(doctor);
     }
+
 
     public Map<String,String> getAvailability(int doctorId){
         Doctor doctor = doctorRepository.findById(doctorId).orElseThrow();

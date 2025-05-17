@@ -98,8 +98,11 @@ public class ReviewService {
             sum +=rating;
             total++;
         }
-        return (sum/total);
-    }
+        if (total == 0) {
+            return 0;
+        }else{
+            return (sum/total);
+        }}
 
     public int productRatingAverage(int id){
         List<Integer> ratings = reviewRepository.findRatingByProductId(id);
@@ -109,8 +112,11 @@ public class ReviewService {
             sum +=rating;
             total++;
         }
+        if (total == 0) {
+            return 0;
+        }else{
         return (sum/total);
-    }
+    }}
 
     public int serviceRatingAverage(int id){
         List<Integer> ratings = reviewRepository.findRatingByProductId(id);
@@ -120,6 +126,9 @@ public class ReviewService {
             sum +=rating;
             total++;
         }
-        return (sum/total);
-    }
+        if (total == 0) {
+            return 0;
+        }else{
+            return (sum/total);
+        }}
 }

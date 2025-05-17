@@ -65,6 +65,10 @@ public class AppUser implements UserDetails {
 
     @OneToMany(mappedBy = "appUser", cascade = CascadeType.ALL)
     @JsonIgnore
+    private List<Notification> notifications;
+
+    @OneToMany(mappedBy = "appUser", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Post> posts;
 
     @ElementCollection
@@ -102,6 +106,38 @@ public class AppUser implements UserDetails {
         this.role = role;
         this.address = address;
         this.password = password;
+    }
+
+    public List<Notification> getNotifications() {
+        return notifications;
+    }
+
+    public void setNotifications(List<Notification> notifications) {
+        this.notifications = notifications;
+    }
+
+    public List<Post> getPosts() {
+        return posts;
+    }
+
+    public void setPosts(List<Post> posts) {
+        this.posts = posts;
+    }
+
+    public List<Message> getSentMessages() {
+        return sentMessages;
+    }
+
+    public void setSentMessages(List<Message> sentMessages) {
+        this.sentMessages = sentMessages;
+    }
+
+    public List<Message> getReceivedMessages() {
+        return receivedMessages;
+    }
+
+    public void setReceivedMessages(List<Message> receivedMessages) {
+        this.receivedMessages = receivedMessages;
     }
 
     public int getAppUserId() {

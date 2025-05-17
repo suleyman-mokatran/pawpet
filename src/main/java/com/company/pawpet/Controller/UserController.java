@@ -38,6 +38,9 @@ public class UserController {
     }
 
     @Autowired
+    private NotificationService notificationService;
+
+    @Autowired
     MessageRepository messageRepository;
 
     @Autowired
@@ -231,7 +234,9 @@ public class UserController {
     public ResponseEntity<String> confirmBooking(@PathVariable int userId,@PathVariable int doctorId,@PathVariable int petId,@PathVariable int appointmentId) throws IOException {
            Appointment appointment =  appointmentService.bookAppointment(userId,doctorId,petId,appointmentId);
         try {
-            notificationHandler.sendNotificationToDoctor(doctorId, "New appointment booked!");
+            notificationHandler.sendNotificationToUser(doctorId, "New appointment booked!");
+            notificationService.addNewNotification(doctorId,"An Appointment has booked! Check Appointments");
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -245,27 +250,22 @@ public class UserController {
     }
 
     @PutMapping("/unbookappointment/{id}")
-    public ResponseEntity<Appointment> unbookAppointment(@PathVariable int id) {
+    public ResponseEntity<Appointment> unbookAppointment(@PathVariable int id) throws IOException {
+        Appointment appointment = appointmentService.getAppointment(id);
+        notificationHandler.sendNotificationToUser(appointment.getDoctor().getAppUserId(), "An appointment has unbooked!");
+        notificationService.addNewNotification(appointment.getDoctor().getAppUserId(),"An Appointment has unbooked! Check Appointments");
+
         return ResponseEntity.ok(appointmentService.unbookAppointment(id));
     }
 
     @PutMapping("/rescheduleappointment/{oldId}/{newId}/{doctorId}")
-    public ResponseEntity<String> rescheduleAppointment(@PathVariable int oldId, @PathVariable int newId, @PathVariable int doctorId) {
-        try {
+    public ResponseEntity<String> rescheduleAppointment(@PathVariable int oldId, @PathVariable int newId, @PathVariable int doctorId) throws IOException {
             appointmentService.rescheduleBookedAppointment(oldId, newId);
 
-            notificationHandler.sendNotificationToDoctor(doctorId, "An appointment has rescheduled!");
+            notificationHandler.sendNotificationToUser(doctorId, "An appointment has rescheduled!");
+            notificationService.addNewNotification(doctorId,"An Appointment has rescheduled! Check Appointments");
 
             return ResponseEntity.ok("Appointment rescheduled successfully!");
-        } catch (NoSuchElementException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Appointment not found!");
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error sending notification: " + e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error rescheduling appointment: " + e.getMessage());
-        }
     }
 
     @GetMapping("/getproducts")
@@ -387,12 +387,12 @@ public class UserController {
                     int newPP = product.getProductProvider().getAppUserId();
                    if(ppIds.isEmpty()){
                        ppIds.add(newPP);
-                       notificationHandler.sendNotificationToPP(newPP, "New Order!");
+                       notificationHandler.sendNotificationToUser(newPP, "New Order!");
                    }
                    else{
                        if(!ppIds.contains(newPP)){
                            ppIds.add(newPP);
-                           notificationHandler.sendNotificationToPP(newPP, "New Order!");
+                           notificationHandler.sendNotificationToUser(newPP, "New Order!");
                        }
                    }
 
@@ -464,7 +464,9 @@ public class UserController {
         ServiceModel serviceModel = serviceService.getServiceById(serviceId);
         int spId = serviceModel.getServiceProvider().getAppUserId();
         try {
-            notificationHandler.sendNotificationToSP(spId, "New appointment booked!");
+            notificationHandler.sendNotificationToUser(spId, "New appointment booked!");
+            notificationService.addNewNotification(spId,"An Appointment has booked! Check Appointments");
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -478,23 +480,13 @@ public class UserController {
     }
 
     @PutMapping("/rescheduleserviceappointment/{oldId}/{newId}/{serviceId}")
-    public ResponseEntity<String> rescheduleServiceAppointment(@PathVariable int oldId, @PathVariable int newId, @PathVariable int serviceId) {
-        try {
+    public ResponseEntity<String> rescheduleServiceAppointment(@PathVariable int oldId, @PathVariable int newId, @PathVariable int serviceId) throws IOException {
             appointmentService.rescheduleBookedAppointment(oldId, newId);
             ServiceModel serviceModel = serviceService.getServiceById(serviceId);
             int spId = serviceModel.getServiceProvider().getAppUserId();
-            notificationHandler.sendNotificationToSP(spId, "An appointment has rescheduled!");
-
+            notificationHandler.sendNotificationToUser(spId, "Your appointment has rescheduled!");
+            notificationService.addNewNotification(spId,"An Appointment has rescheduled! Check Appointments");
             return ResponseEntity.ok("Appointment rescheduled successfully!");
-        } catch (NoSuchElementException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Appointment not found!");
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error sending notification: " + e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error rescheduling appointment: " + e.getMessage());
-        }
     }
 
     @PostMapping("/cod/{userid}")
@@ -521,12 +513,12 @@ public class UserController {
                 int newPP = product.getProductProvider().getAppUserId();
                 if(ppIds.isEmpty()){
                     ppIds.add(newPP);
-                    notificationHandler.sendNotificationToPP(newPP, "New Order!");
+                    notificationHandler.sendNotificationToUser(newPP, "New Order!");
                 }
                 else{
                     if(!ppIds.contains(newPP)){
                         ppIds.add(newPP);
-                        notificationHandler.sendNotificationToPP(newPP, "New Order!");
+                        notificationHandler.sendNotificationToUser(newPP, "New Order!");
                     }
                 }
 
@@ -651,7 +643,7 @@ public class UserController {
 
     @GetMapping("/chats")
     public List<AppUser> getAllChatUsers(@RequestParam Long userId) {
-        List<Long> receiversIds =  messageRepository.findDistinctUserIdsByReceiverId(userId);
+        List<Long> receiversIds =  messageRepository.findDistinctUserIdsInvolvedWithDoctor(userId);
         List<AppUser> receivers = new ArrayList<>();
         for(Long r : receiversIds){
             receivers.add(appUserService.getUserById(r.intValue()).orElseThrow());
@@ -723,6 +715,27 @@ public class UserController {
     @GetMapping("/serviceaverage/{id}")
     public ResponseEntity<Integer> serviceOverAllRatings(@PathVariable int id){
         return ResponseEntity.ok(reviewService.serviceRatingAverage(id));
+    }
+
+    @GetMapping("/getnotifications/{id}")
+    public List<Notification> getNotifications(@PathVariable int id) {
+        return notificationService.getAllNotificationsForUser(id);
+    }
+
+    @GetMapping("/unreadCount/{id}")
+    public int getUnreadCount(@PathVariable int id) {
+        return notificationService.getUnreadCount(id);
+    }
+
+    @PutMapping("/markRead/{id}")
+    public void markAsRead(@PathVariable int id) {
+        notificationService.markAsRead(id);
+    }
+
+    @DeleteMapping("/deletenotification/{id}")
+    public ResponseEntity<String> deleteNotification(@PathVariable int id){
+        notificationService.deleteNotification(id);
+        return ResponseEntity.ok("deleted");
     }
 
 

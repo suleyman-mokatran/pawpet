@@ -1,15 +1,15 @@
 package com.company.pawpet.Service;
 
 import com.company.pawpet.Enum.Role;
-import com.company.pawpet.Model.Company;
-import com.company.pawpet.Model.ProductProvider;
-import com.company.pawpet.Model.ServiceProvider;
+import com.company.pawpet.Model.*;
 import com.company.pawpet.Repository.ServiceProviderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -23,10 +23,17 @@ public class ServiceProviderService {
     @Autowired
     CompanyService companyService;
 
+    @Autowired
+    AppointmentService appointmentService;
+
+    private ServiceService serviceService;
+
     final BCryptPasswordEncoder passwordEncoder;
 
-    public ServiceProviderService(BCryptPasswordEncoder passwordEncoder) {
+    public ServiceProviderService(BCryptPasswordEncoder passwordEncoder,@Lazy ServiceService serviceService) {
         this.passwordEncoder = passwordEncoder;
+        this.serviceService = serviceService;
+
     }
 
     public ServiceProvider addNewSP(ServiceProvider sp){
@@ -75,10 +82,28 @@ public class ServiceProviderService {
         return serviceProviderRepository.save(SPToUpdate);
     }
 
-    public void setAvailability(int spId, Map<String,String> availability){
-        ServiceProvider serviceProvider = serviceProviderRepository.findById(spId).orElseThrow();
-        serviceProvider.setAvailableDays(availability);
-        serviceProviderRepository.save(serviceProvider);
+    public void setAvailability(int spId, Map<String,String> newAvailability){
+        ServiceProvider sp = serviceProviderRepository.findById(spId).orElseThrow();
+        Map<String, String> oldAvailability = sp.getAvailableDays();
+        List<ServiceModel> services = serviceService.getAllServicesBySP(spId);
+        List<Appointment> appointments = new ArrayList<>();
+        for(ServiceModel service : services){
+            appointments.addAll(appointmentService.findAppointmentsByService(service.getServiceId()));
+        }
+        for (Map.Entry<String, String> entry : oldAvailability.entrySet()) {
+            String day = entry.getKey();
+            String oldTimeRange = entry.getValue();
+            String newTimeRange = newAvailability.get(day);
+            if (newTimeRange != null && !newTimeRange.trim().replaceAll("\\s+", "").equalsIgnoreCase(oldTimeRange.trim().replaceAll("\\s+", ""))) {
+                for (Appointment appointment : appointments) {
+                    if (appointment.getDayOfWeek().toString().equalsIgnoreCase(day)) {
+                        appointmentService.DeleteAppointment(appointment.getAppointmentId());
+                    }
+                }
+            }
+        }
+        sp.setAvailableDays(newAvailability);
+        serviceProviderRepository.save(sp);
     }
 
     public Optional<ServiceProvider> getServiceProviderById(int ServiceProviderId){

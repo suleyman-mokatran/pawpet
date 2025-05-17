@@ -5,6 +5,7 @@ import com.company.pawpet.PasswordUpdateRequest;
 import com.company.pawpet.Repository.DoctorRepository;
 import com.company.pawpet.Repository.ServiceProviderRepository;
 import com.company.pawpet.Service.*;
+import com.company.pawpet.chat.MessageRepository;
 import com.company.pawpet.notification.NotificationHandler;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -46,6 +48,9 @@ public class SPController {
     ServiceProviderRepository serviceProviderRepository;
 
     @Autowired
+    NotificationService notificationService;
+
+    @Autowired
     CompanyService companyService;
 
     @Autowired
@@ -56,6 +61,12 @@ public class SPController {
 
     @Autowired
     AppointmentService appointmentService;
+
+    @Autowired
+    MessageRepository messageRepository;
+
+    @Autowired
+    AppUserService appUserService;
 
     @Autowired
     PetService petService;
@@ -188,34 +199,13 @@ public class SPController {
         return ResponseEntity.ok(appointmentService.getAppointment(id));
     }
 
-    @PutMapping("/rescheduleappointment/{oldId}/{newId}/{userId}")
-    public ResponseEntity<String> rescheduleAppointment(@PathVariable int oldId,
-                                                        @PathVariable int newId,
-                                                        @PathVariable int userId) {
-        try {
-            appointmentService.rescheduleBookedAppointment(oldId, newId);
-
-            notificationHandler.sendNotificationToUser(userId, "Your appointment has rescheduled!");
-
-
-            return ResponseEntity.ok("Appointment rescheduled successfully!");
-        } catch (NoSuchElementException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Appointment not found!");
-        }
-        catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error sending notification: " + e.getMessage());
-        }
-        catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error rescheduling appointment: " + e.getMessage());
-        }
-    }
 
     @PutMapping("/cancelappointment/{id}")
-    public ResponseEntity<Appointment> cancelBooking(@PathVariable int id){
-        Appointment appointment = appointmentService.unbookAppointment(id);
-        return ResponseEntity.ok(appointment);
+    public ResponseEntity<Appointment> cancelBooking(@PathVariable int id) throws IOException {
+        Appointment appointment = appointmentService.getAppointment(id);
+        notificationHandler.sendNotificationToUser(appointment.getAppUser().getAppUserId(), "New appointment has canceled!");
+        notificationService.addNewNotification(appointment.getAppUser().getAppUserId(),"An Appointment has canceled! Check Appointments");
+        return ResponseEntity.ok( appointmentService.unbookAppointment(id));
     }
 
     @GetMapping("/getpet/{id}")
@@ -224,9 +214,12 @@ public class SPController {
     }
 
     @PutMapping("/updatemissedappointment/{id}")
-    public ResponseEntity<Appointment> updateMissedAppointment(@PathVariable int id){
+    public ResponseEntity<Appointment> updateMissedAppointment(@PathVariable int id) throws IOException {
         Appointment appointment = appointmentService.getAppointment(id);
         appointment.setStatus("missed");
+        notificationHandler.sendNotificationToUser(appointment.getAppUser().getAppUserId(), "you missed an appointment!");
+        notificationService.addNewNotification(appointment.getAppUser().getAppUserId(),"An Appointment has missed!");
+
         return ResponseEntity.ok(appointmentService.updateServiceAppointment(id,appointment));
     }
 
@@ -235,5 +228,41 @@ public class SPController {
         Appointment appointment = appointmentService.getAppointment(id);
         appointment.setStatus("done");
         return ResponseEntity.ok(appointmentService.updateServiceAppointment(id,appointment));
+    }
+
+    @GetMapping("/getnotifications/{id}")
+    public List<Notification> getNotifications(@PathVariable int id) {
+        return notificationService.getAllNotificationsForUser(id);
+    }
+
+    @GetMapping("/unreadCount/{id}")
+    public int getUnreadCount(@PathVariable int id) {
+        return notificationService.getUnreadCount(id);
+    }
+
+    @PutMapping("/markRead/{id}")
+    public void markAsRead(@PathVariable int id) {
+        notificationService.markAsRead(id);
+    }
+
+    @DeleteMapping("/deletenotification/{id}")
+    public ResponseEntity<String> deleteNotification(@PathVariable int id){
+        notificationService.deleteNotification(id);
+        return ResponseEntity.ok("deleted");
+    }
+
+    @GetMapping("/getbookedappointments/{id}")
+    public ResponseEntity<List<Appointment>> getBookedAppointments(@PathVariable int id){
+        return ResponseEntity.ok(appointmentService.findBookedAppointmentsBySpId(id));
+    }
+
+    @GetMapping("/chats")
+    public List<AppUser> getAllChatUsers(@RequestParam Long doctorId) {
+        List<Long> receiversIds =  messageRepository.findDistinctUserIdsInvolvedWithDoctor(doctorId);
+        List<AppUser> receivers = new ArrayList<>();
+        for(Long r : receiversIds){
+            receivers.add(appUserService.getUserById(r.intValue()).orElseThrow());
+        }
+        return receivers;
     }
 }
