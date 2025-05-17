@@ -1,7 +1,7 @@
 package com.company.pawpet.Controller;
 
 import com.company.pawpet.Model.*;
-import com.company.pawpet.PasswordUpdateRequest;
+import com.company.pawpet.Model.PasswordUpdateRequest;
 import com.company.pawpet.Repository.AppointmentRepository;
 import com.company.pawpet.Repository.DoctorRepository;
 import com.company.pawpet.Service.*;
@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 
 
 @RestController

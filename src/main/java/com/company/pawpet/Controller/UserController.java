@@ -1,12 +1,10 @@
 package com.company.pawpet.Controller;
 
 import com.company.pawpet.Model.*;
-import com.company.pawpet.PaymentRequest;
-import com.company.pawpet.Repository.CartRepository;
-import com.company.pawpet.chat.Message;
+import com.company.pawpet.Model.PaymentRequest;
 import com.company.pawpet.chat.MessageRepository;
 import com.company.pawpet.notification.NotificationHandler;
-import com.company.pawpet.PasswordUpdateRequest;
+import com.company.pawpet.Model.PasswordUpdateRequest;
 import com.company.pawpet.Repository.UserRepository;
 import com.company.pawpet.Service.*;
 import jakarta.validation.Valid;
@@ -22,7 +20,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.*;
 
 @RestController
@@ -364,7 +361,6 @@ public class UserController {
 
     @PostMapping("/pay/{userid}")
     public ResponseEntity<Map<String, String>> makeFakePayment(@PathVariable int userid,@RequestBody PaymentRequest request) throws IOException {
-        if ("4242424242424242".equals(request.getCardNumber())) {
             int orderId;
             List<Integer> ppIds = new ArrayList<>();
             AppUser appUser = appUserService.getUserById(userid).orElseThrow();
@@ -417,12 +413,7 @@ public class UserController {
                     "status", "success",
                     "message", "Payment accepted"
             ));
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
-                    "status", "failed",
-                    "message", "Invalid card number"
-            ));
-        }
+
     }
 
         @GetMapping("/getstock/{productId}")

@@ -1,7 +1,7 @@
 package com.company.pawpet.Controller;
 
 import com.company.pawpet.Model.*;
-import com.company.pawpet.PasswordUpdateRequest;
+import com.company.pawpet.Model.PasswordUpdateRequest;
 import com.company.pawpet.Repository.AdminRepository;
 import com.company.pawpet.Service.*;
 import jakarta.validation.Valid;

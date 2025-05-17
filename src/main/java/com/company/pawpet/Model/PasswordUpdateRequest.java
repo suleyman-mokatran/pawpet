@@ -1,11 +1,10 @@
-package com.company.pawpet;
+package com.company.pawpet.Model;
 
 public class PasswordUpdateRequest {
 
     private String oldPassword;
     private String newPassword;
 
-    // Getters and setters
     public String getOldPassword() {
         return oldPassword;
     }
