@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 @Repository
 public interface AppointmentRepository extends JpaRepository<Appointment, Integer> {
@@ -33,4 +34,9 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Intege
 
     @Query(value = "SELECT a.*, u.* FROM appointment a JOIN appusers u ON a.app_user_id = u.app_user_id WHERE a.appointment_id = :appointmentId", nativeQuery = true)
     List<?> findAppointmentById(@Param("appointmentId") int appointmentId);
+
+    @Query("SELECT a.selectedDate FROM Appointment a WHERE a.booked = true AND a.selectedDate >= CURRENT_DATE AND a.doctor.id = :doctorId")
+    List<LocalDate> findUpcomingBookedDates(@Param("doctorId") int doctorId);
+
+
 }

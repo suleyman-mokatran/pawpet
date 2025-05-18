@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
+import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -124,8 +125,9 @@ public class DoctorController {
     }
 
     @GetMapping("/getbookedappointments/{id}")
-    public ResponseEntity<List<Appointment>> getBookedAppointments(@PathVariable int id){
-        List<Appointment> appointments = appointmentService.findBookedAppointmentsByDoctorId(id);
+    public ResponseEntity<List<String>> getBookedAppointments(@PathVariable int id){
+        List<String> appointments = appointmentService.daysOfUpcomingBookedAppointments(id);
+        System.out.println(appointments);
         return ResponseEntity.ok(appointments);
     }
 

@@ -7,9 +7,13 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class AppointmentService {
@@ -227,6 +231,15 @@ public class AppointmentService {
         updatedAppointment.setBooked(true);
 
         return appointmentRepository.save(updatedAppointment);
+    }
+
+    public List<String> daysOfUpcomingBookedAppointments(int id){
+        List<LocalDate> sqlDates = appointmentRepository.findUpcomingBookedDates(id);
+
+        List<String> dayNames = sqlDates.stream()
+                .map(date -> date.getDayOfWeek().getDisplayName(TextStyle.FULL, Locale.ENGLISH))
+                .collect(Collectors.toList());
+        return dayNames;
     }
 
 }
