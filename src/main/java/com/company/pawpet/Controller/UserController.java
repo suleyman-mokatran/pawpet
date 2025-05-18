@@ -265,9 +265,9 @@ public class UserController {
             return ResponseEntity.ok("Appointment rescheduled successfully!");
     }
 
-    @GetMapping("/getproducts")
-    public ResponseEntity<List<Product>> getAllProducts(){
-        return ResponseEntity.ok(productService.getAllProducts());
+    @GetMapping("/getproducts/{category}")
+    public ResponseEntity<List<Product>> getAllProducts(@PathVariable String category){
+        return ResponseEntity.ok(productService.getProductsByCategory(category));
     }
 
     @GetMapping("/getproduct/{id}")
@@ -727,6 +727,11 @@ public class UserController {
     public ResponseEntity<String> deleteNotification(@PathVariable int id){
         notificationService.deleteNotification(id);
         return ResponseEntity.ok("deleted");
+    }
+
+    @GetMapping("/getproductscategories")
+    public ResponseEntity<List<String>> getProductsCategories(){
+        return ResponseEntity.ok(productService.findProductsByCategory());
     }
 
 

@@ -75,6 +75,10 @@ public class ProductService {
         return productRepository.findAll();
     }
 
+    public List<Product> getProductsByCategory(String type){
+        return productRepository.findProductByCategory(type);
+    }
+
     public int getOverALlStock(int productId){
         Product product = productRepository.findById(productId).orElseThrow();
         int stock=0;
@@ -83,5 +87,9 @@ public class ProductService {
             stock+=stockMap.get(type);
         }
         return stock;
+    }
+
+    public List<String> findProductsByCategory(){
+        return productRepository.findMSCategoryKeysForProduct();
     }
 }
