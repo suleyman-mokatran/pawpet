@@ -16,6 +16,7 @@ public class Doctor extends AppUser {
     @ElementCollection
     private Map<String, String> availableDays;
     int experienceYears;
+    boolean urgent;
 
     @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL)
     @JsonIgnore
@@ -36,6 +37,14 @@ public class Doctor extends AppUser {
 
     @OneToMany(mappedBy = "Doctor", cascade = CascadeType.ALL)
     private List<Appointment> appointmentList;
+
+    public boolean getUrgent() {
+        return urgent;
+    }
+
+    public void setUrgent(boolean urgent) {
+        this.urgent = urgent;
+    }
 
     public String getSpecialization() {
         return specialization;

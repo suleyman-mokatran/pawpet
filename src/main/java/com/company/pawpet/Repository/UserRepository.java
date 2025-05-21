@@ -17,6 +17,38 @@ public interface UserRepository extends JpaRepository<AppUser, Integer> {
 
     List<AppUser> findByRole(Role role);
 
+    @Query(value = """
+  SELECT distinct app_user_id, firstname, lastname 
+  FROM appusers 
+  WHERE app_user_id IN (
+    SELECT app_user_id 
+    FROM orders 
+    WHERE order_id IN (
+      SELECT order_id 
+      FROM orderitems 
+      WHERE product_id IN (
+        SELECT product_id 
+        FROM products 
+        WHERE product_provider_id = :providerId
+      )
+    )
+  )
+""", nativeQuery = true)
+    List<Object[]> findUserIdFirstAndLastNameByProviderId(@Param("providerId") int providerId);
+
+    @Query(value = """
+  SELECT sum(total_price)
+    FROM orders
+    WHERE app_user_id = :userId
+  
+""", nativeQuery = true)
+    int findCountOfOrderItemsByUserId(@Param("userId") int userId);
+
+
+
+
+
+
 
 
 }

@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.parameters.P;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.validation.BindingResult;
@@ -265,12 +266,12 @@ public class AdminController {
     @Autowired
     ProductProviderService productProviderService;
 
-    @PostMapping("/addpp")
-    public ResponseEntity<?> addNewPP(@Valid @RequestBody ProductProvider pp, BindingResult result) {
+    @PostMapping("/addpp/{id}")
+    public ResponseEntity<?> addNewPP(@Valid @RequestBody ProductProvider pp,@PathVariable int id, BindingResult result) {
         if (result.hasErrors()) {
             return ResponseEntity.badRequest().body(result.getAllErrors());
         }
-        ProductProvider savedpp = productProviderService.addNewPP(pp);
+        ProductProvider savedpp = productProviderService.addNewPP(pp,id);
         return ResponseEntity.ok(savedpp);
     }
 

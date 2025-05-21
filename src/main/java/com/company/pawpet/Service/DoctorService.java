@@ -73,6 +73,7 @@ public class DoctorService {
         doctorToUpdate.setAvailableDays(doctor.getAvailableDays());
         doctorToUpdate.setExperienceYears(doctor.getExperienceYears());
         doctorToUpdate.setImage(doctor.getImage());
+        doctorToUpdate.setUrgent(doctor.getUrgent());
 
         return doctorRepository.save(doctorToUpdate);
     }

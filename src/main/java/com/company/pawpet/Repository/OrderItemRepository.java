@@ -28,4 +28,14 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, Integer> {
             nativeQuery = true)
     List<OrderItem> findOrderItemsByOrder(@Param("orderId") int orderId);
 
+    @Query(value = """
+  SELECT p.product_name, SUM(oi.price * oi.quantity) AS total
+  FROM orderitems oi
+  JOIN products p ON oi.product_id = p.product_id
+  WHERE p.product_provider_id = :providerId
+  GROUP BY p.product_name
+""", nativeQuery = true)
+    List<Object[]> findProductSalesByProvider(@Param("providerId") int providerId);
+
+
 }

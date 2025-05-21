@@ -4,13 +4,18 @@ import com.company.pawpet.Model.Category;
 import com.company.pawpet.Model.Company;
 import com.company.pawpet.Model.Product;
 import com.company.pawpet.Model.ProductProvider;
+import com.company.pawpet.Repository.OrderItemRepository;
+import com.company.pawpet.Repository.OrderRepository;
 import com.company.pawpet.Repository.ProductRepository;
+import com.company.pawpet.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 @Service
 public class ProductService {
@@ -24,6 +29,18 @@ public class ProductService {
 
     @Autowired
     ProductProviderService productProviderService;
+
+    @Autowired
+    UserRepository appUserRepository;
+
+    @Autowired
+    ReviewService reviewService;
+
+    @Autowired
+    OrderRepository orderRepository;
+
+    @Autowired
+    OrderItemRepository orderItemRepository;
 
     public Product saveProduct(int categoryId,int ppId,Product product) {
         Product newProduct = new Product();
@@ -92,4 +109,94 @@ public class ProductService {
     public List<String> findProductsByCategory(){
         return productRepository.findMSCategoryKeysForProduct();
     }
+
+    public int numberOfProductsByPP(int id){
+        return productRepository.countProductsByProviderId(id);
+    }
+
+    public List<Map<String, Integer>> namesOfBuyers(int id) {
+        List<Object[]> users = appUserRepository.findUserIdFirstAndLastNameByProviderId(id);
+        List<Map<String, Integer>> buyers = new ArrayList<>();
+        Set<String> seenNames = new HashSet<>();
+
+        for (Object[] o : users) {
+            if (o != null && o.length >= 3) {
+                String fullName = o[1] + " " + o[2];
+                int userId = (int) o[0];
+                int count = appUserRepository.findCountOfOrderItemsByUserId(userId);
+
+                if (!seenNames.contains(fullName)) {
+                    buyers.add(Map.of(fullName, count));
+                    seenNames.add(fullName);
+                }
+            }
+        }
+        return buyers;
+    }
+
+    public List<Map<String, Integer>> ratingsOfProducts(int id) {
+        List<Product> products = productRepository.findProductsByProviderId(id);
+        List<Map<String, Integer>> ratedProducts = new ArrayList<>();
+
+        for (Product p : products) {
+            int rate = reviewService.productRatingAverage(p.getProductId());
+            String name = p.getProductName();
+            ratedProducts.add(Map.of(name, rate));
+        }
+
+        return ratedProducts;
+    }
+
+
+    public String formatDateOnly(Timestamp timestamp) {
+        LocalDate localDate = timestamp.toLocalDateTime().toLocalDate();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy_MM_dd");
+        return localDate.format(formatter);
+    }
+
+    public List<Map<String, Integer>> getRevenueByDate(int providerId) {
+        List<Object[]> rawResults = orderRepository.getDailyTotalPriceByProvider(providerId);
+        List<Map<String, Integer>> result = new ArrayList<>();
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy_MM_dd");
+
+        for (Object[] row : rawResults) {
+            LocalDate localDate;
+
+            if (row[0] instanceof Timestamp ts) {
+                localDate = ts.toLocalDateTime().toLocalDate();
+            } else if (row[0] instanceof java.util.Date date) {
+                localDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            } else {
+                throw new IllegalArgumentException("Unsupported date type: " + row[0].getClass());
+            }
+
+            String formattedDate = localDate.format(formatter);
+            Integer total = ((Number) row[1]).intValue();
+            result.add(Map.of(formattedDate, total));
+        }
+
+        return result;
+    }
+
+
+    public List<Map<String, Integer>> productSales(int providerId) {
+        List<Object[]> results = orderItemRepository.findProductSalesByProvider(providerId);
+        List<Map<String, Integer>> sales = new ArrayList<>();
+
+        for (Object[] row : results) {
+            String productName = (String) row[0];
+            Integer total = ((Number) row[1]).intValue();
+            sales.add(Map.of(productName, total));
+        }
+
+        return sales;
+    }
+
+
+
+
+
+
+
 }

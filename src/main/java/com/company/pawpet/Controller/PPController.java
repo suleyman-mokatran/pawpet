@@ -6,6 +6,7 @@ import com.company.pawpet.Repository.ProductProviderRepository;
 import com.company.pawpet.Service.*;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cglib.core.Local;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -15,6 +16,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -55,6 +57,9 @@ public class PPController {
     @Autowired
     ProductProviderRepository productProviderRepository;
 
+    @Autowired
+    ReviewService reviewService;
+
     @GetMapping("/profile")
     public ResponseEntity<ProductProvider> getUserProfile(@AuthenticationPrincipal UserDetails userDetails) {
         ProductProvider profile = productProviderService.findByUsername(userDetails.getUsername());
@@ -85,12 +90,12 @@ public class PPController {
         return ResponseEntity.ok("Password updated successfully.");
     }
 
-    @PutMapping("/updatepp/{id}/{companyId}")
-    public ResponseEntity<?> updatePp(@PathVariable int id, @PathVariable int companyId, @Valid @RequestBody ProductProvider pp, BindingResult result) {
+    @PutMapping("/updatepp/{id}")
+    public ResponseEntity<?> updatePp(@PathVariable int id, @Valid @RequestBody ProductProvider pp, BindingResult result) {
         if (result.hasErrors()) {
             return ResponseEntity.badRequest().body(result.getAllErrors());
         }
-        ProductProvider savedPp = productProviderService.updateProductProvider(id, companyId, pp);
+        ProductProvider savedPp = productProviderService.updateProductProvider(id, pp);
         return ResponseEntity.ok(savedPp);
     }
 
@@ -195,6 +200,40 @@ public class PPController {
         return ResponseEntity.ok("deleted");
     }
 
+    @GetMapping("/getnumberofproductsbypp/{id}")
+    public ResponseEntity<Integer> getNumberOfProducts(@PathVariable int id){
+    return ResponseEntity.ok(productService.numberOfProductsByPP(id));
+    }
+
+    @GetMapping("/productaverage/{id}")
+    public ResponseEntity<Integer> productOverAllRatings(@PathVariable int id){
+        return ResponseEntity.ok(reviewService.productRatingAverage(id));
+    }
+
+    @GetMapping("/usersorder/{id}")
+    public ResponseEntity<List<Map<String,Integer>>> namesAndOrders(@PathVariable int id){
+        return ResponseEntity.ok(productService.namesOfBuyers(id));
+    }
+
+    @GetMapping("/ratings/{id}")
+    public ResponseEntity<List<Map<String,Integer>>> ratingsOfProductByName(@PathVariable int id){
+        return ResponseEntity.ok(productService.ratingsOfProducts(id));
+    }
+
+    @GetMapping("/getdailyincome/{id}")
+    public ResponseEntity<List<Map<String,Integer>>> getDailyIncome(@PathVariable int id){
+        return ResponseEntity.ok(productService.getRevenueByDate(id));
+    }
+
+    @GetMapping("/getproductssales/{id}")
+    public ResponseEntity<List<Map<String,Integer>>> getProductsSales(@PathVariable int id){
+        return ResponseEntity.ok(productService.productSales(id));
+    }
+
+    @GetMapping("/getstock/{productId}")
+    public ResponseEntity<Integer> getProductStock(@PathVariable int productId){
+        return ResponseEntity.ok(productService.getOverALlStock(productId));
+    }
 
 
 }

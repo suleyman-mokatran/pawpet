@@ -4,6 +4,7 @@ import com.company.pawpet.Model.Review;
 import com.company.pawpet.Repository.ReviewRepository;
 import jakarta.persistence.Access;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -23,6 +24,7 @@ public class ReviewService {
     @Autowired
     DoctorService doctorService;
 
+    @Lazy
     @Autowired
     ProductService productService;
 
@@ -119,7 +121,7 @@ public class ReviewService {
     }}
 
     public int serviceRatingAverage(int id){
-        List<Integer> ratings = reviewRepository.findRatingByProductId(id);
+        List<Integer> ratings = reviewRepository.findRatingByServiceId(id);
         int sum = 0;
         int total=0;
         for(int rating : ratings){

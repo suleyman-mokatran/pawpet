@@ -27,21 +27,15 @@ public class ProductProviderService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public ProductProvider addNewPP(ProductProvider pp){
-
+    public ProductProvider addNewPP(ProductProvider pp,int id){
+    Company company = companyService.getCompanyById(id).orElseThrow();
 
         ProductProvider newPp =new ProductProvider();
 
         newPp.setUsername(pp.getUsername());
         newPp.setPassword(passwordEncoder.encode(pp.getPassword()));
         newPp.setRole(Role.PP);
-        newPp.setAddress(pp.getAddress());
-        newPp.setFirstname(pp.getFirstname());
-        newPp.setLastname(pp.getLastname());
-        newPp.setPhone(pp.getPhone());
-        newPp.setGender(pp.getGender());
-        newPp.setBirthDate(pp.getBirthDate());
-        newPp.setImage(pp.getImage());
+        newPp.setCompany(company);
 
         return productProviderRepository.save(newPp);
     }
@@ -54,9 +48,8 @@ public class ProductProviderService {
         return productProviderRepository.findProductProviderByCompany(companyId);
     }
 
-    public ProductProvider updateProductProvider(int ppId, int companyId,ProductProvider pp) {
+    public ProductProvider updateProductProvider(int ppId,ProductProvider pp) {
         ProductProvider existingPp = productProviderRepository.findById(ppId).orElseThrow();
-        Company company = companyService.getCompanyById(companyId).orElseThrow();
 
         ProductProvider PPToUpdate = existingPp;
 
@@ -67,7 +60,6 @@ public class ProductProviderService {
         PPToUpdate.setImage(pp.getImage());
         PPToUpdate.setPhone(pp.getPhone());
         PPToUpdate.setAddress(pp.getAddress());
-        PPToUpdate.setCompany(company);
 
         return productProviderRepository.save(PPToUpdate);
     }
