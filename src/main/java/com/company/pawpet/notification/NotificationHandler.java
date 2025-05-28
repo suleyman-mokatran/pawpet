@@ -40,13 +40,11 @@ public class NotificationHandler extends TextWebSocketHandler {
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws IOException {
         System.out.println("Received: " + message.getPayload());
-
-        for (WebSocketSession s : userSessions.values()) {
-            if (s.isOpen()) {
-                s.sendMessage(new TextMessage("Server received: " + message.getPayload()));
-            }
+        if (session.isOpen()) {
+            session.sendMessage(new TextMessage("Server received: " + message.getPayload()));
         }
     }
+
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {

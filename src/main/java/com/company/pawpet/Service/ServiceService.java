@@ -5,7 +5,9 @@ import com.company.pawpet.Repository.ServiceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 
@@ -72,6 +74,21 @@ public class ServiceService {
     public List<ServiceModel> getAllServicesBySP(int id) {
         return serviceRepository.findServicesByProviderId(id);
     }
+
+    public List<Map<String, String>> getServicesCategoriesBySp(int id) {
+        List<ServiceModel> services = serviceRepository.findServicesByProviderId(id);
+        List<Map<String, String>> servicesCategories = new ArrayList<>();
+
+        for (ServiceModel service : services) {
+            Map<String, String> categoryMap = service.getServiceCategory().getMSCategory();
+            servicesCategories.add(categoryMap);
+        }
+
+        return servicesCategories;
+    }
+
+
+
 
 
 

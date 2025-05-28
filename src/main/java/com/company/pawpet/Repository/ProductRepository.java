@@ -28,17 +28,19 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     @Query(value = """
   SELECT *
   FROM products
-  WHERE category = (
-    SELECT category_id
-    FROM categories 
-    WHERE category_id = (
-    SELECT category_category_id
-  FROM category_mscategory
-  WHERE mscategory_key = :type
-  )
-  )
+  WHERE (status = 'available' OR status = 'out of stock')
+    AND category = (
+      SELECT category_id
+      FROM categories 
+      WHERE category_id = (
+        SELECT category_category_id
+        FROM category_mscategory
+        WHERE mscategory_key = :type
+      )
+    )
 """, nativeQuery = true)
     List<Product> findProductByCategory(@Param("type") String type);
+
 
     @Query(value = "SELECT COUNT(*) FROM products WHERE product_provider_id = :providerId", nativeQuery = true)
     int countProductsByProviderId(@Param("providerId") int providerId);

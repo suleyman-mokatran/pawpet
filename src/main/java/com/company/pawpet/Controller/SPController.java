@@ -69,6 +69,9 @@ public class SPController {
     @Autowired
     PetService petService;
 
+    @Autowired
+    ReviewService reviewService;
+
     @GetMapping("/profile")
     public ResponseEntity<ServiceProvider> getUserProfile(@AuthenticationPrincipal UserDetails userDetails) {
         ServiceProvider profile = serviceProviderService.findByUsername(userDetails.getUsername());
@@ -99,12 +102,12 @@ public class SPController {
         return ResponseEntity.ok("Password updated successfully.");
     }
 
-    @PutMapping("/updatesp/{id}/{companyId}")
-    public ResponseEntity<?> updateSp(@PathVariable int id, @PathVariable int companyId, @Valid @RequestBody ServiceProvider sp, BindingResult result) {
+    @PutMapping("/updatesp/{id}")
+    public ResponseEntity<?> updateSp(@PathVariable int id,  @Valid @RequestBody ServiceProvider sp, BindingResult result) {
         if (result.hasErrors()) {
             return ResponseEntity.badRequest().body(result.getAllErrors());
         }
-        ServiceProvider savedSp = serviceProviderService.updateServiceProvider(id, companyId, sp);
+        ServiceProvider savedSp = serviceProviderService.updateServiceProvider(id, sp);
         return ResponseEntity.ok(savedSp);
     }
 
@@ -262,5 +265,16 @@ public class SPController {
             receivers.add(appUserService.getUserById(r.intValue()).orElseThrow());
         }
         return receivers;
+    }
+
+    @GetMapping("/serviceaverage/{id}")
+    public ResponseEntity<Integer> serviceOverAllRatings(@PathVariable int id){
+        return ResponseEntity.ok(reviewService.serviceRatingAverage(id));
+    }
+
+
+    @GetMapping("/getselectedservicescategories/{id}")
+    public ResponseEntity<List<Map<String,String>>> getServiceCategories(@PathVariable int id){
+        return ResponseEntity.ok(serviceService.getServicesCategoriesBySp(id));
     }
 }

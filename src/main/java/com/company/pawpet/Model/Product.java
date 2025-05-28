@@ -16,10 +16,11 @@ public class Product {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int productId;  // Corrected field naming
+    private int productId;
 
-    private String ProductName;  // Corrected field naming
+    private String ProductName;
     private String Description;
+    private String status;
 
     @Lob
     private byte[] image;
@@ -67,7 +68,13 @@ public class Product {
     @JsonIgnore
     private List<OrderItem> orderItemList;
 
+    public String getStatus() {
+        return status;
+    }
 
+    public void setStatus(String status) {
+        this.status = status;
+    }
 
     public byte[] getImage() {
         return image;

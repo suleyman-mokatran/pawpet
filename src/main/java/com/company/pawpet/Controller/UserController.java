@@ -416,13 +416,8 @@ public class UserController {
 
     }
 
-        @GetMapping("/getstock/{productId}")
-        public ResponseEntity<Integer> getProductStock(@PathVariable int productId){
-        return ResponseEntity.ok(productService.getOverALlStock(productId));
-        }
-
-        @GetMapping("/order/{userid}")
-        public ResponseEntity<List<Order>> getOrdersByUser(@PathVariable int userid){
+    @GetMapping("/order/{userid}")
+    public ResponseEntity<List<Order>> getOrdersByUser(@PathVariable int userid){
         return ResponseEntity.ok(orderService.getUserOrders(userid));
         }
 
@@ -505,11 +500,15 @@ public class UserController {
                 if(ppIds.isEmpty()){
                     ppIds.add(newPP);
                     notificationHandler.sendNotificationToUser(newPP, "New Order!");
+                    notificationService.addNewNotification(newPP,"New Order, Check your orders!");
+
                 }
                 else{
                     if(!ppIds.contains(newPP)){
                         ppIds.add(newPP);
                         notificationHandler.sendNotificationToUser(newPP, "New Order!");
+                        notificationService.addNewNotification(newPP,"New Order, Check your orders!");
+
                     }
                 }
 

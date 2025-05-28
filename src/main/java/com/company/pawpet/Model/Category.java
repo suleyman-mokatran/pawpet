@@ -27,7 +27,7 @@ public class Category {
     }
 
     @OneToMany(mappedBy = "PetCategory", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonBackReference  // ✅ Prevents infinite loop
+    @JsonBackReference
     private List<Pet> petList;
 
     @OneToMany(mappedBy = "ProductCategory", cascade = CascadeType.ALL)

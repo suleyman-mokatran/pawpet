@@ -36,21 +36,15 @@ public class ServiceProviderService {
 
     }
 
-    public ServiceProvider addNewSP(ServiceProvider sp){
+    public ServiceProvider addNewSP(int id,ServiceProvider sp){
 
         ServiceProvider newSp =new ServiceProvider();
+        Company company = companyService.getCompanyById(id).orElseThrow();
 
         newSp.setUsername(sp.getUsername());
         newSp.setPassword(passwordEncoder.encode(sp.getPassword()));
         newSp.setRole(Role.SP);
-        newSp.setAddress(sp.getAddress());
-        newSp.setFirstname(sp.getFirstname());
-        newSp.setLastname(sp.getLastname());
-        newSp.setPhone(sp.getPhone());
-        newSp.setGender(sp.getGender());
-        newSp.setBirthDate(sp.getBirthDate());
-        newSp.setImage(sp.getImage());
-        newSp.setCompany(sp.getCompany());
+        newSp.setCompany(company);
 
         return serviceProviderRepository.save(newSp);
     }
@@ -63,9 +57,8 @@ public class ServiceProviderService {
         return serviceProviderRepository.findServiceProviderByCompany(companyId);
     }
 
-    public ServiceProvider updateServiceProvider(int ppId, int companyId, ServiceProvider sp) {
+    public ServiceProvider updateServiceProvider(int ppId, ServiceProvider sp) {
         ServiceProvider existingSp = serviceProviderRepository.findById(ppId).orElseThrow();
-        Company company = companyService.getCompanyById(companyId).orElseThrow();
 
         ServiceProvider SPToUpdate = existingSp;
 
@@ -76,7 +69,6 @@ public class ServiceProviderService {
         SPToUpdate.setPhone(sp.getPhone());
         SPToUpdate.setImage(sp.getImage());
         SPToUpdate.setAddress(sp.getAddress());
-        SPToUpdate.setCompany(company);
         SPToUpdate.setSpecialization(sp.getSpecialization());
 
         return serviceProviderRepository.save(SPToUpdate);

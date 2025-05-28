@@ -117,8 +117,8 @@ public class PPController {
     }
 
     @PostMapping("/addproduct/{categoryId}/{ppId}")
-    public ResponseEntity<Product> addNewProduct(@PathVariable int categoryId, @PathVariable int ppId, @RequestBody Product product) {
-        return ResponseEntity.ok(productService.saveProduct(categoryId, ppId, product));
+    public void addNewProduct(@PathVariable int categoryId, @PathVariable int ppId, @RequestBody Product product) {
+        productService.saveProduct(categoryId, ppId, product);
     }
 
     @GetMapping("/getproductcategories")
@@ -131,9 +131,20 @@ public class PPController {
         productService.deleteProduct(id);
     }
 
+    @PutMapping("/inactiveproduct/{id}")
+    public void inactiveProduct(@PathVariable int id){
+   productService.setProductAsInActive(id);
+    }
+
+    @PutMapping("/activeproduct/{id}")
+    public void activeProduct(@PathVariable int id){
+        productService.updateProductStatus(id);
+    }
+
+
     @PutMapping("/updateproduct/{categoryId}/{productId}")
-    public ResponseEntity<Product> updateProduct(@PathVariable int categoryId, @PathVariable int productId, @RequestBody Product product) {
-        return ResponseEntity.ok(productService.updateProduct(categoryId, productId, product));
+    public void updateProduct(@PathVariable int categoryId, @PathVariable int productId, @RequestBody Product product) {
+        productService.updateProduct(categoryId, productId, product);
     }
 
     @GetMapping("/getproduct/{id}")
@@ -230,10 +241,7 @@ public class PPController {
         return ResponseEntity.ok(productService.productSales(id));
     }
 
-    @GetMapping("/getstock/{productId}")
-    public ResponseEntity<Integer> getProductStock(@PathVariable int productId){
-        return ResponseEntity.ok(productService.getOverALlStock(productId));
-    }
+
 
 
 }

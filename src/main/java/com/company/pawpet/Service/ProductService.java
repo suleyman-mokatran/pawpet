@@ -42,7 +42,7 @@ public class ProductService {
     @Autowired
     OrderItemRepository orderItemRepository;
 
-    public Product saveProduct(int categoryId,int ppId,Product product) {
+    public void saveProduct(int categoryId,int ppId,Product product) {
         Product newProduct = new Product();
         Category category = categoryService.findById(categoryId);
         ProductProvider pp = productProviderService.getPPById(ppId).orElseThrow();
@@ -55,8 +55,10 @@ public class ProductService {
         newProduct.setDescription(product.getDescription());
         newProduct.setPriceByColorAndSize(product.getPriceByColorAndSize());
         newProduct.setStockByColorAndSize(product.getStockByColorAndSize());
+        productRepository.save(newProduct);
+        int id = newProduct.getProductId();
+        updateProductStatus(id);
 
-        return productRepository.save(newProduct);
     }
 
     public List<Product> getAllProductsByPP(int id) {
@@ -68,7 +70,7 @@ public class ProductService {
     }
 
 
-    public Product updateProduct(int categoryId,int productId, Product productDetails) {
+    public void updateProduct(int categoryId,int productId, Product productDetails) {
         Product existingProduct = productRepository.findById(productId).orElseThrow();
 
         Product productToUpdate = existingProduct;
@@ -80,8 +82,8 @@ public class ProductService {
         productToUpdate.setImage(productDetails.getImage());
         productToUpdate.setProductCategory(category);
         productToUpdate.setStockByColorAndSize(productDetails.getStockByColorAndSize());
-
-        return productRepository.save(productToUpdate);
+        productRepository.save(productToUpdate);
+        updateProductStatus(productId);
     }
 
     public void deleteProduct(int id) {
@@ -94,16 +96,25 @@ public class ProductService {
 
     public List<Product> getProductsByCategory(String type){
         return productRepository.findProductByCategory(type);
+
     }
 
-    public int getOverALlStock(int productId){
+    public Product updateProductStatus(int productId){
         Product product = productRepository.findById(productId).orElseThrow();
         int stock=0;
         Map<String,Integer> stockMap = product.getStockByColorAndSize();
         for(String type : stockMap.keySet()){
             stock+=stockMap.get(type);
         }
-        return stock;
+        if(stock > 0){
+            product.setStatus("available");
+            productRepository.save(product);
+        }
+        else{
+            product.setStatus("out of stock");
+            productRepository.save(product);
+        }
+        return product;
     }
 
     public List<String> findProductsByCategory(){
@@ -192,6 +203,13 @@ public class ProductService {
 
         return sales;
     }
+
+    public void setProductAsInActive(int id){
+        Product product = productRepository.findById(id).orElseThrow();
+        product.setStatus("inactive");
+        productRepository.save(product);
+    }
+
 
 
 

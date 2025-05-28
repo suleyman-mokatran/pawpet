@@ -19,6 +19,8 @@ public class Notification {
     private boolean isRead;
     private LocalDateTime createdAt;
 
+
+
     public int getId() {
         return id;
     }

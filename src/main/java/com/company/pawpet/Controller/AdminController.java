@@ -237,12 +237,12 @@ public class AdminController {
     @Autowired
     ServiceProviderService serviceProviderService;
 
-    @PostMapping("/addsp")
-    public ResponseEntity<?> addNewSP(@Valid @RequestBody ServiceProvider sp, BindingResult result) {
+    @PostMapping("/addsp/{id}")
+    public ResponseEntity<?> addNewSP(@PathVariable int id,@Valid @RequestBody ServiceProvider sp, BindingResult result) {
         if (result.hasErrors()) {
             return ResponseEntity.badRequest().body(result.getAllErrors());
         }
-        ServiceProvider savedsp = serviceProviderService.addNewSP(sp);
+        ServiceProvider savedsp = serviceProviderService.addNewSP(id,sp);
         return ResponseEntity.ok(savedsp);
     }
 
