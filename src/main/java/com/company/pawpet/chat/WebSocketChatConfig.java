@@ -10,7 +10,9 @@ public class WebSocketChatConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/ws-chat").setAllowedOrigins("*").withSockJS(); // Flutter can connect here
+        registry.addEndpoint("/ws-chat").setAllowedOrigins("*").withSockJS();
+        registry.addEndpoint("/ws-chat").setAllowedOrigins("http://localhost:3000").withSockJS();
+// Flutter can connect here
     }
 
     @Override

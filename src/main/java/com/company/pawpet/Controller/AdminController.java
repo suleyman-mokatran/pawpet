@@ -257,10 +257,10 @@ public class AdminController {
     }
 
     @GetMapping("/getsp/{id}")
-    public ResponseEntity<ServiceProvider> getSpById(@PathVariable int ServiceProviderId) {
-        return serviceProviderService.getServiceProviderById(ServiceProviderId)
+    public ResponseEntity<ServiceProvider> getSpById(@PathVariable int id) {
+        return serviceProviderService.getServiceProviderById(id)
                 .map(ResponseEntity::ok)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Admin not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Sp not found"));
     }
 
     @Autowired
@@ -276,8 +276,8 @@ public class AdminController {
     }
 
     @GetMapping("/getpp/{id}")
-    public ResponseEntity<ProductProvider> getPPById(@PathVariable int PPid) {
-        return productProviderService.getPPById(PPid)
+    public ResponseEntity<ProductProvider> getPPById(@PathVariable int id) {
+        return productProviderService.getPPById(id)
                 .map(ResponseEntity::ok)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "PP not found"));
     }

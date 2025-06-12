@@ -20,6 +20,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/messages")
+@CrossOrigin(origins = "http://localhost:3000")
 public class MessageController {
 
     private MessageRepository messageRepository;
@@ -66,7 +67,7 @@ public class MessageController {
             Files.createDirectories(imagePath.getParent());
             Files.write(imagePath, file.getBytes());
 
-            String imageUrl = "http://10.0.2.2:8080/messages/uploads/" + fileName;
+            String imageUrl = "http://localhost:8080/messages/uploads/" + fileName;
             return ResponseEntity.ok(Map.of("imageUrl", imageUrl));
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();

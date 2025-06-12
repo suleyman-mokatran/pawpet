@@ -132,9 +132,13 @@ public class UserController {
     @GetMapping("/getpets/{id}")
     public ResponseEntity<List<Pet>> getAllPets(@PathVariable int id) {
         List<Pet> pets = petService.getAllPets(id);
-        return ResponseEntity.ok(pets);}
+        return ResponseEntity.ok(pets);
+    }
 
-
+    @GetMapping("/getallusers")
+    public List<AppUser> getAllUsers() {
+        return appUserService.getAllUsers();
+    }
     @DeleteMapping("/deletepet/{id}")
     public void deletePet(@PathVariable int id ){
         petService.deletePet(id);
