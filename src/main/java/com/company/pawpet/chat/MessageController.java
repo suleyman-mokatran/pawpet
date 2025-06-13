@@ -7,7 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -60,14 +60,21 @@ public class MessageController {
     }
 
     @PostMapping("/upload")
-    public ResponseEntity<Map<String, String>> uploadImage(@RequestParam("image") MultipartFile file) {
+    public ResponseEntity<Map<String, String>> uploadImage(
+            @RequestParam("image") MultipartFile file,
+            HttpServletRequest request) {
+
         String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
         Path imagePath = Paths.get("uploads", fileName);
+
         try {
             Files.createDirectories(imagePath.getParent());
             Files.write(imagePath, file.getBytes());
 
-            String imageUrl = "http://localhost:8080/messages/uploads/" + fileName;
+            // 🔁 Dynamically build base URL
+            String baseUrl = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort();
+            String imageUrl = baseUrl + "/messages/uploads/" + fileName;
+
             return ResponseEntity.ok(Map.of("imageUrl", imageUrl));
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
