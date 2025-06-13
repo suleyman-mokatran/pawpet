@@ -332,7 +332,12 @@ public class UserController {
     public ResponseEntity<List<CartItem>> getCart(@PathVariable int id){
         AppUser appUser = userRepository.findById(id).orElseThrow();
         Cart cart = appUser.getCart();
-        List<CartItem> items = cart.getCartItemList();
+        List<CartItem> items ;
+            if(cart == null){
+                items =  new ArrayList<>();
+                return ResponseEntity.ok(items);
+            }
+         items = cart.getCartItemList();
         return ResponseEntity.ok(items);
     }
 
@@ -735,6 +740,11 @@ public class UserController {
     @GetMapping("/getproductscategories")
     public ResponseEntity<List<String>> getProductsCategories(){
         return ResponseEntity.ok(productService.findProductsByCategory());
+    }
+
+    @GetMapping("/geturgentdoctors")
+    public ResponseEntity<List<Doctor>> getUrgentCasesDoctors(){
+        return ResponseEntity.ok(doctorService.getDoctorForUrgentCases());
     }
 
 

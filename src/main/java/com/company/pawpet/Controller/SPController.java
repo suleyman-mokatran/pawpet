@@ -277,4 +277,15 @@ public class SPController {
     public ResponseEntity<List<Map<String,String>>> getServiceCategories(@PathVariable int id){
         return ResponseEntity.ok(serviceService.getServicesCategoriesBySp(id));
     }
+
+    @GetMapping("/ratings/{id}")
+    public ResponseEntity<List<Map<String,Integer>>> ratingsOfProductByName(@PathVariable int id){
+        return ResponseEntity.ok(serviceService.ratingsOfServices(id));
+    }
+
+    @GetMapping("/getcalendarappointments/{id}")
+    public ResponseEntity<List<Appointment>> getAppointmentsBySp(@PathVariable int id){
+        List<Appointment> appointments = appointmentService.findBookedAppointmentsBySpId(id);
+        return ResponseEntity.ok(appointments);
+    }
 }

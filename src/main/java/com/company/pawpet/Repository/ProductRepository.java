@@ -17,7 +17,7 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     @Query(value = """
   SELECT mscategory_key
   FROM category_mscategory
-  WHERE category_category_id = (
+  WHERE category_category_id IN (
     SELECT category_id
     FROM categories 
     WHERE type = 'PRODUCT'
@@ -29,10 +29,10 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
   SELECT *
   FROM products
   WHERE (status = 'available' OR status = 'out of stock')
-    AND category = (
+    AND category IN (
       SELECT category_id
       FROM categories 
-      WHERE category_id = (
+      WHERE category_id IN (
         SELECT category_category_id
         FROM category_mscategory
         WHERE mscategory_key = :type

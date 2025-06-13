@@ -138,5 +138,9 @@ public class DoctorService {
         Doctor doctor = doctorRepository.findById(doctorId).orElseThrow();
         return doctor.getAvailableDays();
     }
+
+    public List<Doctor> getDoctorForUrgentCases(){
+        return  doctorRepository.findDoctorUrgentCases();
+    }
 }
 

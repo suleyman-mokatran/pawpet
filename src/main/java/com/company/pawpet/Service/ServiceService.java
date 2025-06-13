@@ -23,13 +23,15 @@ public class ServiceService {
     @Autowired
     ServiceProviderService serviceProviderService;
 
+    @Autowired
+    ReviewService reviewService;
+
     public ServiceModel addNewService(int categoryId,int spId,ServiceModel service) {
         ServiceModel newService = new ServiceModel();
         Category category = categoryService.findById(categoryId);
         ServiceProvider sp = serviceProviderService.getSPById(spId);
 
         newService.setServiceCategory(category);
-        newService.setCompany(sp.getCompany());
         newService.setServiceProvider(sp);
         newService.setName(service.getName());
         newService.setDescription(service.getDescription());
@@ -87,6 +89,18 @@ public class ServiceService {
         return servicesCategories;
     }
 
+    public List<Map<String, Integer>> ratingsOfServices(int id) {
+        List<ServiceModel> services = serviceRepository.findServicesByProviderId(id);
+        List<Map<String, Integer>> ratedServices = new ArrayList<>();
+
+        for (ServiceModel s : services) {
+            int rate = reviewService.serviceRatingAverage(s.getServiceId());
+            String name = s.getName();
+            ratedServices.add(Map.of(name, rate));
+        }
+
+        return ratedServices;
+    }
 
 
 

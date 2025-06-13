@@ -30,10 +30,6 @@ public class ServiceModel {
     @JsonIgnore
     private List<Review> reviewList;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "CompanyId", referencedColumnName = "CompanyId")
-    private Company company;
-
     @ManyToOne
     @JoinColumn(name = "ServiceProviderId")
     private ServiceProvider serviceProvider;
@@ -92,14 +88,6 @@ public class ServiceModel {
 
     public void setReviewList(List<Review> reviewList) {
         this.reviewList = reviewList;
-    }
-
-    public Company getCompany() {
-        return company;
-    }
-
-    public void setCompany(Company company) {
-        this.company = company;
     }
 
     public ServiceProvider getServiceProvider() {

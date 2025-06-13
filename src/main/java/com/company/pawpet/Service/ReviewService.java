@@ -28,6 +28,7 @@ public class ReviewService {
     @Autowired
     ProductService productService;
 
+    @Lazy
     @Autowired
     ServiceService serviceService;
 

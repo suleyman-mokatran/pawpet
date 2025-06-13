@@ -25,4 +25,10 @@ public interface DoctorRepository extends JpaRepository<Doctor,Integer> {
     List<String> findSpecializations();
 
     Doctor findByUsername(String username);
+
+    @Query(value = "SELECT d.*, u.*\n" +
+            "    FROM Doctor d\n" +
+            "    JOIN appusers u ON d.app_user_id = u.app_user_id\n" +
+            "    WHERE d.urgent = 1", nativeQuery = true)
+    List<Doctor> findDoctorUrgentCases();
 }
