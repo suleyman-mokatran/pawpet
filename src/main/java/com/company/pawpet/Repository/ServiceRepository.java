@@ -20,4 +20,33 @@ public interface ServiceRepository extends JpaRepository<ServiceModel,Integer> {
 
     @Query(value = "SELECT * FROM services WHERE service_provider_id = :providerId", nativeQuery = true)
     List<ServiceModel> findServicesByProviderId(@Param("providerId") int providerId);
+
+    @Query(value = """
+  SELECT mscategory_key
+  FROM category_mscategory
+  WHERE category_category_id IN (
+    SELECT category_id
+    FROM categories 
+    WHERE type = 'SERVICE'
+  )
+""", nativeQuery = true)
+    List<String> findMSCategoryKeysForService();
+
+    @Query(value = """
+  SELECT *
+  FROM services
+  WHERE category IN (
+      SELECT category_id
+      FROM categories 
+      WHERE category_id IN (
+        SELECT category_category_id
+        FROM category_mscategory
+        WHERE mscategory_key = :type
+      )
+    )
+""", nativeQuery = true)
+    List<ServiceModel> findServiceByCategory(@Param("type") String type);
+
+    @Query(value = "SELECT COUNT(*) from services where service_provider_id = :id",nativeQuery = true)
+    Integer countServices(@Param("id") int id);
 }

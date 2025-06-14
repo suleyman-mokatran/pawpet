@@ -435,9 +435,9 @@ public class UserController {
         return ResponseEntity.ok(orderItemService.getOrderItems(orderId));
     }
 
-    @GetMapping("/getallservices")
-    public ResponseEntity<List<ServiceModel>> getAllServices(){
-        return ResponseEntity.ok(serviceService.getAllServices());
+    @GetMapping("/getallservices/{category}")
+    public ResponseEntity<List<ServiceModel>> getAllServices(@PathVariable String category){
+        return ResponseEntity.ok(serviceService.getAllServices(category));
     }
 
     @GetMapping("/getserviceappointments/{id}")
@@ -740,6 +740,11 @@ public class UserController {
     @GetMapping("/getproductscategories")
     public ResponseEntity<List<String>> getProductsCategories(){
         return ResponseEntity.ok(productService.findProductsByCategory());
+    }
+
+    @GetMapping("/getservicecategories")
+    public ResponseEntity<List<String>> getServicesCategories(){
+        return ResponseEntity.ok(serviceService.findServicesByCategory());
     }
 
     @GetMapping("/geturgentdoctors")

@@ -279,7 +279,7 @@ public class SPController {
     }
 
     @GetMapping("/ratings/{id}")
-    public ResponseEntity<List<Map<String,Integer>>> ratingsOfProductByName(@PathVariable int id){
+    public ResponseEntity<List<Map<String,Integer>>> ratingsOfServiceByName(@PathVariable int id){
         return ResponseEntity.ok(serviceService.ratingsOfServices(id));
     }
 
@@ -287,5 +287,15 @@ public class SPController {
     public ResponseEntity<List<Appointment>> getAppointmentsBySp(@PathVariable int id){
         List<Appointment> appointments = appointmentService.findBookedAppointmentsBySpId(id);
         return ResponseEntity.ok(appointments);
+    }
+
+    @GetMapping("/countservices/{id}")
+        public ResponseEntity<Integer> countservices(@PathVariable int id){
+        return ResponseEntity.ok(serviceService.findServicesNumber(id));
+    }
+
+    @GetMapping("/appointmentsperservice/{id}")
+    public ResponseEntity<List<Map<String,Integer>>> appointmentsPerService(@PathVariable int id){
+        return ResponseEntity.ok(serviceService.nbOfAppointmentsPerService(id));
     }
 }

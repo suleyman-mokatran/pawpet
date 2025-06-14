@@ -53,8 +53,8 @@ public class ServiceService {
 
         return serviceRepository.save(serviceToUpdate);
     }
-    public List<ServiceModel> getAllServices() {
-        return serviceRepository.findAll();
+    public List<ServiceModel> getAllServices(String category) {
+        return serviceRepository.findServiceByCategory(category);
     }
 
     public ServiceModel getServiceById(int id) {
@@ -102,7 +102,33 @@ public class ServiceService {
         return ratedServices;
     }
 
+    public List<Map<String, Integer>> nbOfAppointmentsPerService(int id) {
+        List<ServiceModel> services = serviceRepository.findServicesByProviderId(id);
+        List<Map<String, Integer>> servicesAppointments = new ArrayList<>();
 
+        for (ServiceModel s : services) {
+            int count = 0;
+            if (s.getAppointmentList() != null && !s.getAppointmentList().isEmpty()) {
+                for (Appointment a : s.getAppointmentList()) {
+                    if (a.isBooked()) {
+                        count++;
+                    }
+                }
+            }
+            servicesAppointments.add(Map.of(s.getName(), count));
+        }
+
+        return servicesAppointments;
+    }
+
+
+    public List<String> findServicesByCategory(){
+        return serviceRepository.findMSCategoryKeysForService();
+    }
+
+    public int findServicesNumber(int id){
+        return serviceRepository.countServices(id);
+    }
 
 
 
