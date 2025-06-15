@@ -252,5 +252,21 @@ public class DoctorController {
         return ResponseEntity.ok("deleted");
     }
 
+    @GetMapping("/percentageofbookings/{id}")
+    public ResponseEntity<Double> getPercentageOfBooking(@PathVariable int id){
+        return ResponseEntity.ok(appointmentService.findPercentageBookedAppointments(id));
+    }
+
+    @GetMapping("/nbofdifferentusers/{id}")
+    public ResponseEntity<Integer> getNumberOfDifferentUsers(@PathVariable int id){
+        return ResponseEntity.ok(appointmentService.findNumberOfDifferentUsers(id));
+    }
+
+
+    @GetMapping("/percentageofattendance/{id}")
+    public ResponseEntity<Double> getPercentageOfAttendance(@PathVariable int id){
+        return ResponseEntity.ok(appointmentService.findAttendedNumberOfUsers(id));
+    }
+
 
 }

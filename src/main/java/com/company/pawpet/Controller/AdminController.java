@@ -364,7 +364,7 @@ public class AdminController {
     }
 
     @GetMapping("/countservices/{id}")
-    public ResponseEntity<Integer> countservices(@PathVariable int id){
+    public ResponseEntity<Integer> countServices(@PathVariable int id){
         return ResponseEntity.ok(serviceService.findServicesNumber(id));
     }
 
