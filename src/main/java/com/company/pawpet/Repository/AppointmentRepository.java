@@ -8,6 +8,8 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
+
 @Repository
 public interface AppointmentRepository extends JpaRepository<Appointment, Integer> {
 
@@ -38,5 +40,25 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Intege
     @Query("SELECT a.selectedDate FROM Appointment a WHERE a.booked = true AND a.selectedDate >= CURRENT_DATE AND a.doctor.id = :doctorId")
     List<LocalDate> findUpcomingBookedDates(@Param("doctorId") int doctorId);
 
+    @Query(value = "Select booked from appointment where doctor_id =:doctorId", nativeQuery = true)
+    List<Boolean> findBookingInsights(@Param("doctorId") int doctorId);
+
+    @Query(
+            value = "SELECT selected_date AS selectedDate, COUNT(*) AS count FROM Appointment WHERE booked = 1 AND doctor_id = :doctorId GROUP BY selected_date",
+            nativeQuery = true
+    )
+    List<Map<String, Object>> findBookedDates(@Param("doctorId") int doctorId);
+
+    @Query(value = "select distinct app_user_id from appointment where doctor_id = :doctorId && app_user_id IS NOT NULL",nativeQuery = true)
+    List<Integer> numberOfDifferentUsers(@Param("doctorId") int doctorId);
+
+    @Query(value = "select count(status) from appointment where doctor_id = :doctorId AND status = 'done'",nativeQuery = true)
+    Integer numberOfAttendedUsers(@Param("doctorId") int doctorId);
+
+    @Query(value = "select count(*) from appointment where booked = 1 AND doctor_id = :doctorId",nativeQuery = true)
+    Integer findNumbersOfBookedAppointmentsByDoctor(@Param("doctorId") int doctorId);
+
+    @Query(value = "select  type AS type  ,count(*) AS count from appointment where app_user_id = :userId group by type",nativeQuery = true)
+    List<Map<String, Object>> findBookedAppointmentsType(@Param("userId") int userId);
 
 }

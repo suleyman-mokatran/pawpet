@@ -16,6 +16,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -33,6 +35,24 @@ public class AdminController {
 
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
+
+    @Autowired
+    ProductService productService;
+
+    @Autowired
+    ServiceService serviceService;
+
+    @Autowired
+    AppointmentService appointmentService;
+
+    @Autowired
+    PetService petService;
+
+    @Autowired
+    PostService postService;
+
+    @Autowired
+    OrderService orderService;
 
 
 
@@ -323,5 +343,80 @@ public class AdminController {
         return companyService.findAllCompanies();
     }
 
+    @GetMapping("/productsratings/{id}")
+    public ResponseEntity<List<Map<String,Integer>>> ratingsOfProductByName(@PathVariable int id){
+        return ResponseEntity.ok(productService.ratingsOfProducts(id));
+    }
+
+    @GetMapping("/getdailyincome/{id}")
+    public ResponseEntity<List<Map<String,Integer>>> getDailyIncome(@PathVariable int id){
+        return ResponseEntity.ok(productService.getRevenueByDate(id));
+    }
+
+    @GetMapping("/getproductssales/{id}")
+    public ResponseEntity<List<Map<String,Integer>>> getProductsSales(@PathVariable int id){
+        return ResponseEntity.ok(productService.productSales(id));
+    }
+
+    @GetMapping("/countservices/{id}")
+    public ResponseEntity<Integer> countservices(@PathVariable int id){
+        return ResponseEntity.ok(serviceService.findServicesNumber(id));
+    }
+
+    @GetMapping("/appointmentsperservice/{id}")
+    public ResponseEntity<List<Map<String,Integer>>> appointmentsPerService(@PathVariable int id){
+        return ResponseEntity.ok(serviceService.nbOfAppointmentsPerService(id));
+    }
+
+    @GetMapping("/servicesratings/{id}")
+    public ResponseEntity<List<Map<String,Integer>>> ratingsOfServiceByName(@PathVariable int id){
+        return ResponseEntity.ok(serviceService.ratingsOfServices(id));
+    }
+
+    @GetMapping("/bookedinsights/{id}")
+    public ResponseEntity<List<Boolean>> BookedAppointmentsInsights(@PathVariable int id){
+        return ResponseEntity.ok(appointmentService.bookingInsights(id));
+    }
+
+    @GetMapping("/bookedappointmentsperdate/{id}")
+    public ResponseEntity<List<Map<String, Object>>> getBookedAppointmentsPerDate(@PathVariable int id){
+        return ResponseEntity.ok(appointmentService.findBookedPerDate(id));
+    }
+
+    @GetMapping("/percentageofbookings/{id}")
+    public ResponseEntity<Double> getPercentageOfBooking(@PathVariable int id){
+        return ResponseEntity.ok(appointmentService.findPercentageBookedAppointments(id));
+    }
+
+    @GetMapping("/nbofdifferentusers/{id}")
+    public ResponseEntity<Integer> getNumberOfDifferentUsers(@PathVariable int id){
+        return ResponseEntity.ok(appointmentService.findNumberOfDifferentUsers(id));
+    }
+
+
+    @GetMapping("/percentageofattendance/{id}")
+    public ResponseEntity<Double> getPercentageOfAttendance(@PathVariable int id){
+        return ResponseEntity.ok(appointmentService.findAttendedNumberOfUsers(id));
+    }
+
+    @GetMapping("/getnumberofpets/{id}")
+    public ResponseEntity<Integer> getNumberOfPetsForUser(@PathVariable int id){
+        return ResponseEntity.ok(petService.getNumberOfPets(id));
+    }
+
+    @GetMapping("/getnumberofposts/{id}")
+    public ResponseEntity<Integer> getNumberOfPostsForUser(@PathVariable int id){
+        return ResponseEntity.ok(postService.getNumberOfPostsForUser(id));
+    }
+
+    @GetMapping("/getpurchasesforuser/{id}")
+    public ResponseEntity<List<Map<String,Integer>>> getPurchases(@PathVariable int id){
+        return ResponseEntity.ok(orderService.getPurchasesByDate(id));
+    }
+
+    @GetMapping("/bookedappointmentsbytype/{id}")
+    public ResponseEntity<List<Map<String, Object>>> getBookedAppointmentsTypeForUser(@PathVariable int id) {
+        return ResponseEntity.ok(appointmentService.findBookedAppointmentsType(id));
+    }
 
 }

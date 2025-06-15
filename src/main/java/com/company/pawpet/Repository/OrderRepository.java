@@ -7,7 +7,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Integer> {
@@ -33,4 +35,6 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
     """, nativeQuery = true)
     List<Object[]> getDailyTotalPriceByProvider(@Param("providerId") int providerId);
 
+    @Query(value = "SELECT DATE(created_at) AS date , SUM(total_price) AS total FROM orders WHERE app_user_id = :userId GROUP BY DATE(created_at) ORDER BY DATE(created_at)",nativeQuery = true)
+    List<Map<String,Integer>> findPurchasesAccordingToDate(@Param("userId") int userId);
 }

@@ -31,4 +31,7 @@ public interface PostRepository extends JpaRepository<Post,Integer> {
     @Transactional
     @Query(value = "DELETE FROM post WHERE pet_id = :petId", nativeQuery = true)
     void deletePostsByPetId(@Param("petId") int petId);
+
+    @Query(value = "select count(*) from post where app_user_id = :userId",nativeQuery = true)
+    Integer findNumberOfPosts(@Param("userId") int userId);
 }

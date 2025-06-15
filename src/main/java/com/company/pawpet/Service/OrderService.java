@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -79,5 +80,9 @@ public class OrderService {
 
     public List<Order> getUserOrders(int userId){
         return orderRepository.findOrdersByUserId(userId);
+    }
+
+    public List<Map<String,Integer>> getPurchasesByDate(int id){
+        return orderRepository.findPurchasesAccordingToDate(id);
     }
 }

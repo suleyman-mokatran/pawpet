@@ -86,5 +86,9 @@ public class PostService {
         return newpost.getPostId();
     }
 
+    public int getNumberOfPostsForUser(int id){
+        return postRepository.findNumberOfPosts(id);
+    }
+
 
 }

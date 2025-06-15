@@ -165,7 +165,9 @@ public class PetService {
         pet.setForAdoption(false);
         pet.setAppUser(adopter);
         petRepository.save(pet);
+        }
 
-
+        public int getNumberOfPets(int id){
+        return petRepository.findNumberOfPets(id);
         }
 }

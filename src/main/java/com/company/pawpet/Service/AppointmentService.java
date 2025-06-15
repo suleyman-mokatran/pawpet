@@ -9,10 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.format.TextStyle;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -241,6 +238,59 @@ public class AppointmentService {
                 .collect(Collectors.toList());
         return dayNames;
     }
+
+    public List<Boolean> bookingInsights(int id){
+        return appointmentRepository.findBookingInsights(id);
+    }
+
+    public List<Map<String, Object>> findBookedPerDate(int id){
+        return appointmentRepository.findBookedDates(id);
+    }
+
+    public double findPercentageBookedAppointments(int id) {
+        List<Boolean> booking = appointmentRepository.findBookingInsights(id);
+        int booked = 0;
+        int total = 0;
+
+        if (!booking.isEmpty()) {
+            for (Boolean b : booking) {
+                total++;
+                if (b != null && b) {
+                    booked++;
+                }
+            }
+            return ((double) booked / total) * 100;
+        }
+
+        return 0.0;
+    }
+
+
+    public int findNumberOfDifferentUsers(int id){
+        List<Integer> nbOfUsers =  appointmentRepository.numberOfDifferentUsers(id);
+        int total = 0;
+        if(!nbOfUsers.isEmpty()) {
+            for (Integer n : nbOfUsers) {
+                total++;
+            }
+        }
+        return total;
+    }
+
+    public double findAttendedNumberOfUsers(int id){
+        Integer number = appointmentRepository.numberOfAttendedUsers(id);
+        Integer numberOfAppointments = appointmentRepository.findNumbersOfBookedAppointmentsByDoctor(id);
+        double percentage = 0.0;
+        if(number != 0 && numberOfAppointments != 0){
+            percentage = ((double) number/numberOfAppointments) * 100;
+        }
+        return percentage;
+    }
+
+    public List<Map<String, Object>> findBookedAppointmentsType(int id){
+        return appointmentRepository.findBookedAppointmentsType(id);
+    }
+
 
 }
 

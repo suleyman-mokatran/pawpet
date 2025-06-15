@@ -21,6 +21,8 @@ public interface PetRepository extends JpaRepository<Pet,Integer> {
     @Query(value = "SELECT * FROM pets WHERE pet_user_id = :appUserId", nativeQuery = true)
     List<Pet> findPetsByUserId(@Param("appUserId") int appUserId);
 
+    @Query(value = "select count(*) from pets where pet_user_id = :userId",nativeQuery = true)
+    Integer findNumberOfPets(@Param("userId") int userId);
 
 
 }
