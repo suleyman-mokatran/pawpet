@@ -348,6 +348,11 @@ public class AdminController {
         return ResponseEntity.ok(productService.ratingsOfProducts(id));
     }
 
+    @GetMapping("/usersorder/{id}")
+    public ResponseEntity<List<Map<String,Integer>>> namesAndOrders(@PathVariable int id){
+        return ResponseEntity.ok(productService.namesOfBuyers(id));
+    }
+
     @GetMapping("/getdailyincome/{id}")
     public ResponseEntity<List<Map<String,Integer>>> getDailyIncome(@PathVariable int id){
         return ResponseEntity.ok(productService.getRevenueByDate(id));
