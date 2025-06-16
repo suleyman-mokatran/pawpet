@@ -424,4 +424,56 @@ public class AdminController {
         return ResponseEntity.ok(appointmentService.findBookedAppointmentsType(id));
     }
 
+    @GetMapping("/totalvetappointments")
+    public ResponseEntity<Integer> totalVetAppointments(){
+        return ResponseEntity.ok(appointmentService.getTotalVetAppointments());
+    }
+
+    @GetMapping("/totalserviceappointments")
+    public ResponseEntity<Integer> totalServiceAppointments(){
+        return ResponseEntity.ok(appointmentService.getTotalServiceAppointments());
+    }
+
+    @GetMapping("/totalusers")
+    public ResponseEntity<Integer> totalUsers(){
+        return ResponseEntity.ok(appUserService.getTotalUsers());
+    }
+
+    @GetMapping("/totalsps")
+    public ResponseEntity<Integer> totalSps(){
+        return ResponseEntity.ok(appUserService.getTotalSps());
+    }
+
+    @GetMapping("/totalpps")
+    public ResponseEntity<Integer> totalPps(){
+        return ResponseEntity.ok(appUserService.getTotalPps());
+    }
+
+    @GetMapping("/totaldoctors")
+    public ResponseEntity<Integer> totalDoctos(){
+        return ResponseEntity.ok(appUserService.getTotalDoctors());
+    }
+
+    @GetMapping("/totalproducts")
+    public ResponseEntity<Integer> totalProducts(){
+        return ResponseEntity.ok(productService.getTotalProducts());
+    }
+
+    @GetMapping("/totalposts")
+    public ResponseEntity<Integer> totalPosts(){
+        return ResponseEntity.ok(postService.findNumberOfPosts());
+    }
+
+    @GetMapping("/totalpets")
+    public ResponseEntity<Integer> totalPets(){
+        return ResponseEntity.ok(petService.findNumberOfPets());
+    }
+
+    @GetMapping("/totalservices")
+    public ResponseEntity<Integer> totalServices(){
+        return ResponseEntity.ok(serviceService.getServicesNumber());
+    }
+
+
+
 }

@@ -291,6 +291,16 @@ public class AppointmentService {
         return appointmentRepository.findBookedAppointmentsType(id);
     }
 
+    public int getTotalVetAppointments(){
+        return appointmentRepository.findTotalNumberOfVetAppointments();
+    }
+
+    public int getTotalServiceAppointments(){
+        return appointmentRepository.findTotalNumberOfServiceAppointments();
+    }
+
+
+
 
 }
 

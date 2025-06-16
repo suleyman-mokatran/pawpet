@@ -85,6 +85,20 @@ public class AppUserService{
         return appUserRepository.findByUsername(username);
     }
 
+   public int getTotalUsers(){
+        return appUserRepository.numberOfUsers();
+   }
 
+    public int getTotalSps(){
+        return appUserRepository.numberOfSps();
+    }
+
+    public int getTotalPps(){
+        return appUserRepository.numberOfPps();
+    }
+
+    public int getTotalDoctors(){
+        return appUserRepository.numberOfDoctors();
+    }
 
 }

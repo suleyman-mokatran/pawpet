@@ -210,6 +210,10 @@ public class ProductService {
         productRepository.save(product);
     }
 
+    public int getTotalProducts(){
+        return productRepository.numberOfProducts();
+    }
+
 
 
 

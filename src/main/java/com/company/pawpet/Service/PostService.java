@@ -90,5 +90,9 @@ public class PostService {
         return postRepository.findNumberOfPosts(id);
     }
 
+    public int findNumberOfPosts(){
+        return postRepository.numberOfPosts();
+    }
+
 
 }

@@ -170,4 +170,8 @@ public class PetService {
         public int getNumberOfPets(int id){
         return petRepository.findNumberOfPets(id);
         }
+
+    public int findNumberOfPets(){
+        return petRepository.numberOfPets();
+    }
 }

@@ -34,4 +34,9 @@ public interface PostRepository extends JpaRepository<Post,Integer> {
 
     @Query(value = "select count(*) from post where app_user_id = :userId",nativeQuery = true)
     Integer findNumberOfPosts(@Param("userId") int userId);
+
+    @Query(value = "select count(*) from post ",nativeQuery = true)
+    Integer numberOfPosts();
+
+
 }

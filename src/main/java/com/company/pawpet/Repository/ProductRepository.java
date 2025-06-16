@@ -45,4 +45,8 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     @Query(value = "SELECT COUNT(*) FROM products WHERE product_provider_id = :providerId", nativeQuery = true)
     int countProductsByProviderId(@Param("providerId") int providerId);
 
+    @Query(value = "select count(*) from products",nativeQuery = true)
+    Integer numberOfProducts();
+
+
 }

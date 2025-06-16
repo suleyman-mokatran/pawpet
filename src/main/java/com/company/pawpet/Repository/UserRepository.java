@@ -44,7 +44,17 @@ public interface UserRepository extends JpaRepository<AppUser, Integer> {
 """, nativeQuery = true)
     int findCountOfOrderItemsByUserId(@Param("userId") int userId);
 
+    @Query(value = "select count(*) from appusers where role ='DOCTOR'",nativeQuery = true)
+    Integer numberOfDoctors();
 
+    @Query(value = "select count(*) from appusers where role ='SP'",nativeQuery = true)
+    Integer numberOfSps();
+
+    @Query(value = "select count(*) from appusers where role ='PP'",nativeQuery = true)
+    Integer numberOfPps();
+
+    @Query(value = "select count(*) from appusers where role ='USER'",nativeQuery = true)
+    Integer numberOfUsers();
 
 
 

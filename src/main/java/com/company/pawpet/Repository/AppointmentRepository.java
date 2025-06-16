@@ -61,4 +61,11 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Intege
     @Query(value = "select  type AS type  ,count(*) AS count from appointment where app_user_id = :userId group by type",nativeQuery = true)
     List<Map<String, Object>> findBookedAppointmentsType(@Param("userId") int userId);
 
+    @Query(value = "select count(*) from appointment where type = 'VET'",nativeQuery = true)
+    Integer findTotalNumberOfVetAppointments();
+
+    @Query(value = "select count(*) from appointment where type = 'Service'",nativeQuery = true)
+    Integer findTotalNumberOfServiceAppointments();
+
+
 }

@@ -130,6 +130,10 @@ public class ServiceService {
         return serviceRepository.countServices(id);
     }
 
+    public int getServicesNumber(){
+        return serviceRepository.numberOfServices();
+    }
+
 
 
 }

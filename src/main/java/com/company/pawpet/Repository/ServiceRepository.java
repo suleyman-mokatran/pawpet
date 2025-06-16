@@ -49,4 +49,8 @@ public interface ServiceRepository extends JpaRepository<ServiceModel,Integer> {
 
     @Query(value = "SELECT COUNT(*) from services where service_provider_id = :id",nativeQuery = true)
     Integer countServices(@Param("id") int id);
+
+
+    @Query(value = "SELECT COUNT(*) from services ",nativeQuery = true)
+    Integer numberOfServices();
 }
