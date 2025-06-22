@@ -258,8 +258,8 @@ public class SPController {
     }
 
     @GetMapping("/chats")
-    public List<AppUser> getAllChatUsers(@RequestParam Long doctorId) {
-        List<Long> receiversIds =  messageRepository.findDistinctUserIdsInvolvedWithDoctor(doctorId);
+    public List<AppUser> getAllChatUsers(@RequestParam Long spId) {
+        List<Long> receiversIds =  messageRepository.findDistinctUserIdsInvolvedWithDoctor(spId);
         List<AppUser> receivers = new ArrayList<>();
         for(Long r : receiversIds){
             receivers.add(appUserService.getUserById(r.intValue()).orElseThrow());

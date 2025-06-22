@@ -253,9 +253,15 @@ public class UserController {
     @PutMapping("/unbookappointment/{id}")
     public ResponseEntity<Appointment> unbookAppointment(@PathVariable int id) throws IOException {
         Appointment appointment = appointmentService.getAppointment(id);
-        notificationHandler.sendNotificationToUser(appointment.getDoctor().getAppUserId(), "An appointment has unbooked!");
-        notificationService.addNewNotification(appointment.getDoctor().getAppUserId(),"An Appointment has unbooked! Check Appointments");
+        if(appointment.getDoctor() != null ) {
+            notificationHandler.sendNotificationToUser(appointment.getDoctor().getAppUserId(), "An appointment has unbooked!");
+            notificationService.addNewNotification(appointment.getDoctor().getAppUserId(), "An Appointment has unbooked! Check Appointments");
+        }
+        else{
+            notificationHandler.sendNotificationToUser(appointment.getService().getServiceProvider().getAppUserId(), "An appointment has unbooked!");
+            notificationService.addNewNotification(appointment.getService().getServiceProvider().getAppUserId(), "An Appointment has unbooked! Check Appointments");
 
+        }
         return ResponseEntity.ok(appointmentService.unbookAppointment(id));
     }
 
@@ -544,10 +550,18 @@ public class UserController {
             ));
     }
 
-    @GetMapping("/getposts")
-    public ResponseEntity<List<Post>> getAllPosts(){
-        return ResponseEntity.ok(postService.getAllPosts());
-    }
+    @GetMapping("/getposts/{userId}")
+    public ResponseEntity<List<Post>> getAllPosts(@PathVariable int userId){
+        List<Post> posts=  postService.getAllPosts();
+        List<Post> Posts = new ArrayList<>();
+        for(Post p : posts) {
+                int PosterId = p.getAppUser().getAppUserId();
+                boolean isNotPoster = PosterId != userId;
+                if (isNotPoster) {
+                    Posts.add(p);
+                }
+        }
+        return ResponseEntity.ok(Posts);    }
 
     @PostMapping("/addfoundlostpost/{id}")
     public int addNewLostFoundPost(@PathVariable int id,@RequestBody Post post){
@@ -610,13 +624,15 @@ public class UserController {
     public ResponseEntity<List<Post>> getAdoptionPosts(@PathVariable int id){
        List<Post> posts=  postService.getAllPosts();
        List<Post> adoptionPosts = new ArrayList<>();
-       for(Post p : posts){
-           boolean isAdoption = p.getType().equals("For Adoption") || p.getType().equals("For Adoption CD");
-           int PosterId = p.getAppUser().getAppUserId();
-           boolean isNotPoster = PosterId!=id;
+       for(Post p : posts) {
+           if (p.getType() != null) {
+               boolean isAdoption = p.getType().equals("For Adoption") || p.getType().equals("For Adoption CD");
+               int PosterId = p.getAppUser().getAppUserId();
+               boolean isNotPoster = PosterId != id;
 
-           if (isAdoption && isNotPoster) {
-               adoptionPosts.add(p);
+               if (isAdoption && isNotPoster) {
+                   adoptionPosts.add(p);
+               }
            }
        }
        return ResponseEntity.ok(adoptionPosts);
@@ -627,13 +643,15 @@ public class UserController {
         List<Post> posts=  postService.getAllPosts();
         List<Post> lostFoundPosts = new ArrayList<>();
         for(Post p : posts){
-           boolean isLostFound = p.getType().equals("Lost-Found")||p.getType().equals("Lost-Found-CD");
+            if(p.getType() != null) {
+                boolean isLostFound = p.getType().equals("Lost-Found") || p.getType().equals("Lost-Found-CD");
 
-            int PosterId = p.getAppUser().getAppUserId();
-            boolean isNotPoster = PosterId!=id;
+                int PosterId = p.getAppUser().getAppUserId();
+                boolean isNotPoster = PosterId != id;
 
-            if (isLostFound && isNotPoster) {
-                lostFoundPosts.add(p);
+                if (isLostFound && isNotPoster) {
+                    lostFoundPosts.add(p);
+                }
             }
             }
 
