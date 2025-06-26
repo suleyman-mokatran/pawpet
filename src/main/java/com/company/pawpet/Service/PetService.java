@@ -45,6 +45,8 @@ public class PetService {
 
 
         Pet newPet = new Pet();
+        newPet.setLostPostId(0);
+        newPet.setAdoptPostId(0);
         newPet.setPetName(pet.getPetName());
         newPet.setCreatedAt(LocalDateTime.now());
         newPet.setImage(pet.getImage());
@@ -128,30 +130,34 @@ public class PetService {
         return lostOrFound;
     }
 
-    public Pet markAsLost(int id){
-        Pet pet = petRepository.findById(id).orElseThrow();
+    public Pet markAsLost(int petid,int postid){
+        Pet pet = petRepository.findById(petid).orElseThrow();
+        pet.setLostPostId(postid);
         pet.setStatus("Lost");
         petRepository.save(pet);
         return pet;
     }
 
-    public Pet markAsFound(int id){
-        Pet pet = petRepository.findById(id).orElseThrow();
+    public Pet markAsFound(int petid){
+        Pet pet = petRepository.findById(petid).orElseThrow();
         pet.setStatus("Adopted");
+        pet.setLostPostId(0);
         petRepository.save(pet);
         return pet;
     }
 
-    public Pet forAdoption(int id){
-        Pet pet = petRepository.findById(id).orElseThrow();
+    public Pet forAdoption(int petid,int postid){
+        Pet pet = petRepository.findById(petid).orElseThrow();
+        pet.setAdoptPostId(postid);
         pet.setForAdoption(true);
         petRepository.save(pet);
         return pet;
     }
 
-    public Pet cancelForAdoption(int id){
-        Pet pet = petRepository.findById(id).orElseThrow();
-        messageRepository.deleteMessagesByPetId(id);
+    public Pet cancelForAdoption(int petid){
+        Pet pet = petRepository.findById(petid).orElseThrow();
+        messageRepository.deleteMessagesByPetId(petid);
+        pet.setAdoptPostId(0);
         pet.setForAdoption(false);
         petRepository.save(pet);
         return pet;

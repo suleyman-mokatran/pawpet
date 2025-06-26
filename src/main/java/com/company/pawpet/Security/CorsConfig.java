@@ -20,8 +20,8 @@ public class CorsConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
 
-        config.setAllowCredentials(true);  // السماح بالكويكيز والتوكنات
-        config.setAllowedOrigins(List.of("http://localhost:3000")); // السماح للـ Frontend
+        config.setAllowCredentials(true);
+        config.setAllowedOrigins(List.of("http://localhost:3000","http://localhost:8080"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
 

@@ -22,7 +22,7 @@ public interface ServiceRepository extends JpaRepository<ServiceModel,Integer> {
     List<ServiceModel> findServicesByProviderId(@Param("providerId") int providerId);
 
     @Query(value = """
-  SELECT mscategory_key
+  SELECT distinct mscategory_key
   FROM category_mscategory
   WHERE category_category_id IN (
     SELECT category_id

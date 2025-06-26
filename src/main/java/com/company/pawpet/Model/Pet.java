@@ -30,6 +30,8 @@ public class Pet {
     boolean forAdoption;
     int Weight;
     int Age;
+    int lostPostId;
+    int adoptPostId;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     @ElementCollection
@@ -88,6 +90,22 @@ public class Pet {
         this.LastVetVisit = lastVetVisit;
         this.NextVetVisit = nextVetVisit;
         this.CreatedAt = createdAt;
+    }
+
+    public int getLostPostId() {
+        return lostPostId;
+    }
+
+    public void setLostPostId(int lostPostId) {
+        this.lostPostId = lostPostId;
+    }
+
+    public int getAdoptPostId() {
+        return adoptPostId;
+    }
+
+    public void setAdoptPostId(int adoptPostId) {
+        this.adoptPostId = adoptPostId;
     }
 
     public List<Appointment> getAppointmentList() {

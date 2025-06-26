@@ -40,7 +40,8 @@ public class PostService {
     }
 
     public void deletePost(int id){
-        postRepository.deleteById(id);
+        postRepository.deletePostImagesByPostId(id);
+        postRepository.deletePostsByPostId(id);
     }
 
     public List<Post> getUserPosts(int id){

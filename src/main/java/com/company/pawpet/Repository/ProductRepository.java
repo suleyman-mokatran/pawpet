@@ -15,7 +15,7 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     List<Product> findProductsByProviderId(@Param("providerId") int providerId);
 
     @Query(value = """
-  SELECT mscategory_key
+  SELECT distinct mscategory_key
   FROM category_mscategory
   WHERE category_category_id IN (
     SELECT category_id

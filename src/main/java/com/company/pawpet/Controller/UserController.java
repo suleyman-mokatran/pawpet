@@ -139,6 +139,7 @@ public class UserController {
     public List<AppUser> getAllUsers() {
         return appUserService.getAllUsers();
     }
+
     @DeleteMapping("/deletepet/{id}")
     public void deletePet(@PathVariable int id ){
         petService.deletePet(id);
@@ -568,14 +569,16 @@ public class UserController {
         return postService.addLostFoundPost(id,post);
     }
 
-    @PutMapping("/markaslost/{id}")
-    public Pet markAsLost(@PathVariable int id){
-            return petService.markAsLost(id);
+    @PutMapping("/markaslost/{petid}/{postid}")
+    public Pet markAsLost(@PathVariable int petid,@PathVariable int postid){
+            return petService.markAsLost(petid,postid);
     }
 
-    @PutMapping("/markasfound/{id}")
-    public Pet markAsFound(@PathVariable int id){
-        return petService.markAsFound(id);
+    @PutMapping("/markasfound/{petid}/{postid}")
+    public ResponseEntity<String> markAsFound(@PathVariable int petid,@PathVariable int postid){
+         petService.markAsFound(petid);
+        postService.deletePost(postid);
+        return ResponseEntity.ok("success");
     }
 
     @DeleteMapping("/deletepost/{id}")
@@ -605,14 +608,16 @@ public class UserController {
     }
 
 
-    @PutMapping("/foradoption/{id}")
-    public Pet markPetForAdoption(@PathVariable int id){
-        return petService.forAdoption(id);
+    @PutMapping("/foradoption/{petid}/{postid}")
+    public Pet markPetForAdoption(@PathVariable int petid,@PathVariable int postid){
+        return petService.forAdoption(petid,postid);
     }
 
-    @PutMapping("/cancelforadoption/{id}")
-    public Pet CancelForAdoption(@PathVariable int id){
-        return petService.cancelForAdoption(id);
+    @PutMapping("/cancelforadoption/{petid}/{postid}")
+    public ResponseEntity<String> CancelForAdoption(@PathVariable int petid,@PathVariable int postid){
+         petService.cancelForAdoption(petid);
+         postService.deletePost(postid);
+        return ResponseEntity.ok("Success");
     }
 
     @PostMapping("/addpost/{id}")

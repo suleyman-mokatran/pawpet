@@ -77,6 +77,7 @@ public class AppUserService{
     public List<AppUser> getAllUsers(){
         return appUserRepository.findByRole(Role.USER);
     }
+
     public Optional<AppUser> getUserById(int id) {
         return appUserRepository.findById(id);
     }
